@@ -2,31 +2,16 @@ package handlers
 
 import (
 	"fmt"
-	"github.com/moonicy/gometrics/internal/storage"
+	"github.com/go-chi/chi/v5"
 	"net/http"
 	"strconv"
 )
 
-const (
-	gauge   = "gauge"
-	counter = "counter"
-	mName   = "name"
-	mValue  = "value"
-	mType   = "type"
-)
+func (u *MetricsHandler) UpdateMetrics(res http.ResponseWriter, req *http.Request) {
+	name := chi.URLParam(req, mName)
+	val := chi.URLParam(req, mValue)
+	tp := chi.URLParam(req, mType)
 
-type UpdateMetrics struct {
-	mem storage.MemoryStorage
-}
-
-func NewUpdateMetrics(mem storage.MemoryStorage) *UpdateMetrics {
-	return &UpdateMetrics{mem}
-}
-
-func (u *UpdateMetrics) UpdateMetrics(res http.ResponseWriter, req *http.Request) {
-	name := req.PathValue(mName)
-	val := req.PathValue(mValue)
-	tp := req.PathValue(mType)
 	if name == "" {
 		http.Error(res, "Not found", http.StatusNotFound)
 	}

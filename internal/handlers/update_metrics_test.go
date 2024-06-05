@@ -1,6 +1,8 @@
 package handlers
 
 import (
+	"fmt"
+	"github.com/go-chi/chi/v5"
 	"github.com/moonicy/gometrics/internal/agent"
 	"github.com/moonicy/gometrics/internal/storage"
 	"net/http"
@@ -16,29 +18,29 @@ func TestUpdateMetrics_updateMetrics(t *testing.T) {
 		valMet  string
 		status  int
 	}{
-		{name: "response 200 for gauge", tpMet: agent.Gauge, nameMet: agent.Alloc, valMet: "11.1", status: 200},
-		{name: "response 200 for counter", tpMet: agent.Counter, nameMet: agent.Frees, valMet: "11", status: 200},
-		{name: "wrong type", tpMet: "wrong", nameMet: agent.Alloc, valMet: "11", status: 400},
-		{name: "without name", tpMet: agent.Gauge, nameMet: "", valMet: "11", status: 404},
-		{name: "value for gauge not float", tpMet: agent.Gauge, nameMet: agent.Frees, valMet: "str", status: 400},
-		{name: "value for counter not int", tpMet: agent.Counter, nameMet: agent.Alloc, valMet: "11.1", status: 400},
+		{name: "response 200 for gauge", tpMet: agent.Gauge, nameMet: agent.Alloc, valMet: "11.1", status: http.StatusOK},
+		{name: "response 200 for counter", tpMet: agent.Counter, nameMet: agent.Frees, valMet: "11", status: http.StatusOK},
+		{name: "wrong type", tpMet: "wrong", nameMet: agent.Alloc, valMet: "11", status: http.StatusBadRequest},
+		{name: "without name", tpMet: agent.Gauge, nameMet: "", valMet: "11", status: http.StatusNotFound},
+		{name: "value for gauge not float", tpMet: agent.Gauge, nameMet: agent.Frees, valMet: "str", status: http.StatusBadRequest},
+		{name: "value for counter not int", tpMet: agent.Counter, nameMet: agent.Alloc, valMet: "11.1", status: http.StatusBadRequest},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			req, err := http.NewRequest("POST", "/update/{type}/{name}/{value}/", nil)
+			url := fmt.Sprintf("/update/%s/%s/%s", tt.tpMet, tt.nameMet, tt.valMet)
+			req, err := http.NewRequest("POST", url, nil)
 			if err != nil {
 				t.Fatalf("could not create request: %v", err)
 			}
-			req.SetPathValue("type", tt.tpMet)
-			req.SetPathValue("name", tt.nameMet)
-			req.SetPathValue("value", tt.valMet)
 
-			u := &UpdateMetrics{
+			u := &MetricsHandler{
 				mem: storage.NewMemStorage(),
 			}
+
 			rec := httptest.NewRecorder()
-			handler := http.HandlerFunc(u.UpdateMetrics)
-			handler.ServeHTTP(rec, req)
+			r := chi.NewRouter()
+			r.Post("/update/{type}/{name}/{value}", u.UpdateMetrics)
+			r.ServeHTTP(rec, req)
 
 			resp := rec.Result()
 			defer resp.Body.Close()
