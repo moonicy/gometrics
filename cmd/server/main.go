@@ -6,9 +6,11 @@ import (
 )
 
 func main() {
+	parseFlags()
+
 	route := handlers.Route()
 
-	err := http.ListenAndServe(`:8080`, route)
+	err := http.ListenAndServe(flagRunAddr, route)
 	if err != nil {
 		panic(err)
 	}
