@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"fmt"
+	"github.com/moonicy/gometrics/internal/utils"
 	"net/http"
 	"strings"
 )
@@ -13,7 +14,7 @@ func (u *MetricsHandler) GetMetrics(res http.ResponseWriter, _ *http.Request) {
 		builder.WriteString(fmt.Sprintf("%s: %d\n", k, v))
 	}
 	for k, v := range gotGauge {
-		builder.WriteString(fmt.Sprintf("%s: %.3f\n", k, v))
+		builder.WriteString(fmt.Sprintf("%s: %s\n", k, utils.FloatToString(v)))
 	}
 	_, err := res.Write([]byte(builder.String()))
 	if err != nil {
