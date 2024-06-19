@@ -11,7 +11,7 @@ import (
 )
 
 func TestMetricsHandler_GetMetrics(t *testing.T) {
-	const bodyWait = "alloc: 22\nfrees: 22.000\n"
+	const bodyWait = "alloc: 22\nfrees: 22\n"
 	req, err := http.NewRequest("GET", "/", nil)
 	if err != nil {
 		t.Fatalf("could not create request: %v", err)
