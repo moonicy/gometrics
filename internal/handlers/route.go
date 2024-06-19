@@ -1,14 +1,20 @@
 package handlers
 
 import (
+	"github.com/go-chi/chi/v5"
 	"github.com/moonicy/gometrics/internal/storage"
-	"net/http"
 )
 
-func Route() *http.ServeMux {
+func Route() *chi.Mux {
 	mem := storage.NewMemStorage()
-	updateMetrics := NewUpdateMetrics(mem)
-	mux := http.NewServeMux()
-	mux.HandleFunc("/update/{type}/{name}/{value}/", updateMetrics.UpdateMetrics)
-	return mux
+	metricsHandler := NewMetricsHandler(mem)
+
+	router := chi.NewRouter()
+	router.Route("/", func(r chi.Router) {
+		r.Get("/", metricsHandler.GetMetrics)
+		r.Get("/value/{type}/{name}", metricsHandler.GetMetricsByName)
+		r.Post("/update/{type}/{name}/{value}", metricsHandler.UpdateMetrics)
+	})
+
+	return router
 }
