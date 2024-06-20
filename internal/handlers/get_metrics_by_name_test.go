@@ -12,7 +12,7 @@ import (
 
 func TestMetricsHandler_GetMetricsByName(t *testing.T) {
 	defaultMemStorage := storage.NewMemStorage()
-	presetMemStorage := func() storage.MemoryStorage {
+	presetMemStorage := func() Storage {
 		mem := storage.NewMemStorage()
 		mem.AddCounter(agent.Alloc, 22)
 		mem.SetGauge(agent.Frees, 22)
@@ -22,7 +22,7 @@ func TestMetricsHandler_GetMetricsByName(t *testing.T) {
 		name    string
 		tpMet   string
 		nameMet string
-		mem     storage.MemoryStorage
+		mem     Storage
 		status  int
 	}{
 		{name: "gauge not found", tpMet: agent.Gauge, nameMet: agent.Alloc, mem: defaultMemStorage, status: http.StatusNotFound},

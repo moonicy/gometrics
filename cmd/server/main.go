@@ -2,16 +2,22 @@ package main
 
 import (
 	"github.com/moonicy/gometrics/internal/handlers"
+	"github.com/moonicy/gometrics/internal/logger"
 	"net/http"
 )
 
 func main() {
-	parseFlags()
+	addr := parseFlagRunAddr()
+	sugar := logger.NewLogger()
+	route := handlers.NewRoute(sugar)
 
-	route := handlers.RouteNew()
+	sugar.Infow(
+		"Starting server",
+		"addr", addr,
+	)
 
-	err := http.ListenAndServe(flagRunAddr, route)
+	err := http.ListenAndServe(addr, route)
 	if err != nil {
-		panic(err)
+		sugar.Fatalw(err.Error(), "event", "start server")
 	}
 }
