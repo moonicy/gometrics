@@ -3,7 +3,7 @@ package handlers
 import (
 	"fmt"
 	"github.com/go-chi/chi/v5"
-	"github.com/moonicy/gometrics/internal/utils"
+	"github.com/moonicy/gometrics/internal/floattostr"
 	"net/http"
 )
 
@@ -21,7 +21,7 @@ func (u *MetricsHandler) GetMetricsByName(res http.ResponseWriter, req *http.Req
 		if !ok {
 			http.Error(res, "Not found", http.StatusNotFound)
 		}
-		_, err := res.Write([]byte(utils.FloatToString(value)))
+		_, err := res.Write([]byte(floattostr.FloatToString(value)))
 		if err != nil {
 			http.Error(res, "Internal Error", http.StatusInternalServerError)
 		}

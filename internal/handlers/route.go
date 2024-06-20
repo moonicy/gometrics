@@ -5,7 +5,7 @@ import (
 	"github.com/moonicy/gometrics/internal/storage"
 )
 
-func Route() *chi.Mux {
+func RouteNew() *chi.Mux {
 	mem := storage.NewMemStorage()
 	metricsHandler := NewMetricsHandler(mem)
 

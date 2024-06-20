@@ -8,7 +8,7 @@ import (
 func main() {
 	parseFlags()
 
-	route := handlers.Route()
+	route := handlers.RouteNew()
 
 	err := http.ListenAndServe(flagRunAddr, route)
 	if err != nil {
