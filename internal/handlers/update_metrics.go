@@ -1,38 +1,41 @@
 package handlers
 
 import (
+	"encoding/json"
+	"errors"
 	"fmt"
-	"github.com/go-chi/chi/v5"
+	"github.com/moonicy/gometrics/internal/metrics"
+	"io"
 	"net/http"
-	"strconv"
 )
 
 func (u *MetricsHandler) UpdateMetrics(res http.ResponseWriter, req *http.Request) {
-	name := chi.URLParam(req, mName)
-	val := chi.URLParam(req, mValue)
-	tp := chi.URLParam(req, mType)
 
-	if name == "" {
-		http.Error(res, "Not found", http.StatusNotFound)
+	var mt metrics.Metrics
+
+	body, err := io.ReadAll(req.Body)
+	if err != nil {
+		http.Error(res, err.Error(), http.StatusBadRequest)
+		return
+	}
+	if err = json.Unmarshal(body, &mt); err != nil {
+		http.Error(res, err.Error(), http.StatusBadRequest)
+		return
 	}
 
-	switch tp {
-	case gauge:
-		valFloat, err := strconv.ParseFloat(val, 64)
-		if err != nil {
-			http.Error(res, "Value is not a valid float64", http.StatusBadRequest)
-			return
+	if err = mt.Validate(); err != nil {
+		if errors.Is(err, metrics.ErrNotFound) {
+			http.Error(res, err.Error(), http.StatusNotFound)
 		}
-		u.mem.SetGauge(name, valFloat)
-	case counter:
-		valInt, err := strconv.ParseInt(val, 10, 64)
-		if err != nil {
-			http.Error(res, "Value is not a valid int64", http.StatusBadRequest)
-			return
-		}
-		u.mem.AddCounter(name, valInt)
-	default:
-		http.Error(res, "Bad request", http.StatusBadRequest)
+		http.Error(res, err.Error(), http.StatusBadRequest)
 	}
-	fmt.Printf("%s\t%s\t%s\n", name, val, tp)
+
+	switch mt.MType {
+	case metrics.Gauge:
+		u.mem.SetGauge(mt.ID, *mt.Value)
+		fmt.Printf("%s\t%s\t%f\n", mt.ID, mt.MType, *mt.Value)
+	case metrics.Counter:
+		u.mem.AddCounter(mt.ID, *mt.Delta)
+		fmt.Printf("%s\t%s\t%d\n", mt.ID, mt.MType, *mt.Delta)
+	}
 }

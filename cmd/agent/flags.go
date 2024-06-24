@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"github.com/moonicy/gometrics/internal/http"
 	"os"
 	"strings"
 )
@@ -11,7 +12,7 @@ var flagReportInterval string
 var flagPollInterval string
 
 func parseFlags() {
-	flag.StringVar(&flagRunAddr, "a", "http://localhost:8080", "address and port to run server")
+	flag.StringVar(&flagRunAddr, "a", http.DefaultHost, "address and port to run server")
 	flag.StringVar(&flagReportInterval, "r", "10", "report interval")
 	flag.StringVar(&flagPollInterval, "p", "2", "poll interval")
 	flag.Parse()

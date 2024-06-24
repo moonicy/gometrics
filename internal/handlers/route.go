@@ -16,7 +16,7 @@ func NewRoute(log zap.SugaredLogger) *chi.Mux {
 		r.Use(middlewares.WithLogging(log))
 		r.Get("/", metricsHandler.GetMetrics)
 		r.Get("/value/{type}/{name}", metricsHandler.GetMetricsByName)
-		r.Post("/update/{type}/{name}/{value}", metricsHandler.UpdateMetrics)
+		r.Post("/update", metricsHandler.UpdateMetrics)
 	})
 
 	return router
