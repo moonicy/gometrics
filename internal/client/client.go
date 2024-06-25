@@ -23,40 +23,48 @@ func NewClient(host string) *Client {
 }
 
 func (cl *Client) sendGaugeMetrics(tp string, name string, value float64) string {
-	body := metrics.Metrics{ID: name, MType: tp, Value: &value}
+	body := metrics.Metrics{MetricName: metrics.MetricName{ID: name, MType: tp}, Value: &value}
 	out, err := json.Marshal(body)
 	if err != nil {
-		log.Fatal(err)
+		log.Print(err)
+		return ""
 	}
 
-	url := fmt.Sprintf("%s/update", cl.host)
+	url := fmt.Sprintf("%s/update/", cl.host)
 	req, err := http.NewRequest("POST", url, bytes.NewBuffer(out))
 	if err != nil {
-		log.Fatalln(err)
+		log.Print(err)
+		return ""
 	}
+	req.Header.Add("Content-Type", "application/json")
 	resp, err := cl.httpClient.Do(req)
 	if err != nil {
-		log.Fatalln(err)
+		log.Print(err)
+		return ""
 	}
 	defer resp.Body.Close()
 	return resp.Status
 }
 
 func (cl *Client) sendCounterMetrics(tp string, name string, delta int64) string {
-	body := metrics.Metrics{ID: name, MType: tp, Delta: &delta}
+	body := metrics.Metrics{MetricName: metrics.MetricName{ID: name, MType: tp}, Delta: &delta}
 	out, err := json.Marshal(body)
 	if err != nil {
-		log.Fatal(err)
+		log.Print(err)
+		return ""
 	}
 
-	url := fmt.Sprintf("%s/update", cl.host)
+	url := fmt.Sprintf("%s/update/", cl.host)
 	req, err := http.NewRequest("POST", url, bytes.NewBuffer(out))
 	if err != nil {
-		log.Fatalln(err)
+		log.Print(err)
+		return ""
 	}
+	req.Header.Add("Content-Type", "application/json")
 	resp, err := cl.httpClient.Do(req)
 	if err != nil {
-		log.Fatalln(err)
+		log.Print(err)
+		return ""
 	}
 	defer resp.Body.Close()
 	return resp.Status

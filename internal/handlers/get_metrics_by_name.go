@@ -21,6 +21,7 @@ func (u *MetricsHandler) GetMetricsByName(res http.ResponseWriter, req *http.Req
 		value, ok := u.mem.GetGauge(name)
 		if !ok {
 			http.Error(res, "Not found", http.StatusNotFound)
+			return
 		}
 		_, err := res.Write([]byte(floattostr.FloatToString(value)))
 		if err != nil {
@@ -30,6 +31,7 @@ func (u *MetricsHandler) GetMetricsByName(res http.ResponseWriter, req *http.Req
 		value, ok := u.mem.GetCounter(name)
 		if !ok {
 			http.Error(res, "Not found", http.StatusNotFound)
+			return
 		}
 		_, err := res.Write([]byte(fmt.Sprintf("%d", value)))
 		if err != nil {

@@ -5,4 +5,5 @@ const (
 	Counter = "counter"
 	MName   = "name"
 	MType   = "type"
+	MValue  = "value"
 )

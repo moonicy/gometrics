@@ -1,14 +1,10 @@
 package handlers
 
 import (
-	"bytes"
-	"encoding/json"
+	"fmt"
 	"github.com/go-chi/chi/v5"
 	"github.com/moonicy/gometrics/internal/agent"
-	l2p "github.com/moonicy/gometrics/internal/literaltopointer"
-	"github.com/moonicy/gometrics/internal/metrics"
 	"github.com/moonicy/gometrics/internal/storage"
-	"log"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -16,22 +12,23 @@ import (
 
 func TestUpdateMetrics_updateMetrics(t *testing.T) {
 	tests := []struct {
-		status int
-		name   string
-		body   metrics.Metrics
+		name    string
+		tpMet   string
+		nameMet string
+		valMet  string
+		status  int
 	}{
-		{name: "response 200 for gauge", body: metrics.Metrics{ID: agent.Alloc, MType: agent.Gauge, Value: l2p.NewFloat(11.1)}, status: http.StatusOK},
-		{name: "response 200 for counter", body: metrics.Metrics{ID: agent.Frees, MType: agent.Counter, Delta: l2p.NewInt(11)}, status: http.StatusOK},
-		{name: "wrong type", body: metrics.Metrics{ID: agent.Alloc, MType: "wrong", Delta: l2p.NewInt(11)}, status: http.StatusBadRequest},
-		{name: "without name", body: metrics.Metrics{ID: "", MType: agent.Gauge, Value: l2p.NewFloat(11)}, status: http.StatusNotFound},
+		{name: "response 200 for gauge", tpMet: agent.Gauge, nameMet: agent.Alloc, valMet: "11.1", status: http.StatusOK},
+		{name: "response 200 for counter", tpMet: agent.Counter, nameMet: agent.Frees, valMet: "11", status: http.StatusOK},
+		{name: "wrong type", tpMet: "wrong", nameMet: agent.Alloc, valMet: "11", status: http.StatusBadRequest},
+		{name: "without name", tpMet: agent.Gauge, nameMet: "", valMet: "11", status: http.StatusNotFound},
+		{name: "value for gauge not float", tpMet: agent.Gauge, nameMet: agent.Frees, valMet: "str", status: http.StatusBadRequest},
+		{name: "value for counter not int", tpMet: agent.Counter, nameMet: agent.Alloc, valMet: "11.1", status: http.StatusBadRequest},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			out, err := json.Marshal(tt.body)
-			if err != nil {
-				log.Fatal(err)
-			}
-			req, err := http.NewRequest("POST", "/update", bytes.NewBuffer(out))
+			url := fmt.Sprintf("/update/%s/%s/%s", tt.tpMet, tt.nameMet, tt.valMet)
+			req, err := http.NewRequest("POST", url, nil)
 			if err != nil {
 				t.Fatalf("could not create request: %v", err)
 			}
@@ -42,7 +39,7 @@ func TestUpdateMetrics_updateMetrics(t *testing.T) {
 
 			rec := httptest.NewRecorder()
 			r := chi.NewRouter()
-			r.Post("/update", u.UpdateMetrics)
+			r.Post("/update/{type}/{name}/{value}", u.UpdateMetrics)
 			r.ServeHTTP(rec, req)
 
 			resp := rec.Result()

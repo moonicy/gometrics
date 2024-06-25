@@ -4,7 +4,6 @@ import (
 	"flag"
 	"github.com/moonicy/gometrics/internal/http"
 	"os"
-	"strings"
 )
 
 var flagRunAddr string
@@ -26,15 +25,4 @@ func parseFlags() {
 	if envPollInterval := os.Getenv("POLL_INTERVAL"); envPollInterval != "" {
 		flagPollInterval = envPollInterval
 	}
-}
-
-func parseURI(uri string) string {
-	str := strings.Split(uri, ":")
-	if len(str) == 1 {
-		return "http://localhost" + uri
-	}
-	if len(str) < 3 {
-		return "http://" + uri
-	}
-	return uri
 }
