@@ -1,13 +1,5 @@
 package handlers
 
-const (
-	gauge   = "gauge"
-	counter = "counter"
-	mName   = "name"
-	mValue  = "value"
-	mType   = "type"
-)
-
 type MetricsHandler struct {
 	mem Storage
 }
