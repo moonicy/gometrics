@@ -8,6 +8,7 @@ import (
 )
 
 func (u *MetricsHandler) GetMetrics(res http.ResponseWriter, _ *http.Request) {
+	res.Header().Set("Content-Type", "text/html")
 	gotCounter, gotGauge := u.mem.GetMetrics()
 	builder := strings.Builder{}
 	for k, v := range gotCounter {
