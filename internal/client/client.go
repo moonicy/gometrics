@@ -2,6 +2,7 @@ package client
 
 import (
 	"bytes"
+	"compress/gzip"
 	"encoding/json"
 	"fmt"
 	"github.com/moonicy/gometrics/internal/agent"
@@ -30,13 +31,20 @@ func (cl *Client) sendGaugeMetrics(tp string, name string, value float64) string
 		return ""
 	}
 
+	buf := bytes.NewBuffer(nil)
+	zb := gzip.NewWriter(buf)
+	_, _ = zb.Write(out)
+
+	zb.Close()
+
 	url := fmt.Sprintf("%s/update/", cl.host)
-	req, err := http.NewRequest("POST", url, bytes.NewBuffer(out))
+	req, err := http.NewRequest("POST", url, buf)
 	if err != nil {
 		log.Print(err)
 		return ""
 	}
 	req.Header.Add("Content-Type", "application/json")
+	req.Header.Add("Content-Encoding", "gzip")
 	resp, err := cl.httpClient.Do(req)
 	if err != nil {
 		log.Print(err)
@@ -54,13 +62,20 @@ func (cl *Client) sendCounterMetrics(tp string, name string, delta int64) string
 		return ""
 	}
 
+	buf := bytes.NewBuffer(nil)
+	zb := gzip.NewWriter(buf)
+	_, _ = zb.Write(out)
+
+	zb.Close()
+
 	url := fmt.Sprintf("%s/update/", cl.host)
-	req, err := http.NewRequest("POST", url, bytes.NewBuffer(out))
+	req, err := http.NewRequest("POST", url, buf)
 	if err != nil {
 		log.Print(err)
 		return ""
 	}
 	req.Header.Add("Content-Type", "application/json")
+	req.Header.Add("Content-Encoding", "gzip")
 	resp, err := cl.httpClient.Do(req)
 	if err != nil {
 		log.Print(err)
