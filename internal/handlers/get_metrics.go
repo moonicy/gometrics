@@ -2,7 +2,7 @@ package handlers
 
 import (
 	"fmt"
-	"github.com/moonicy/gometrics/internal/floattostr"
+	"github.com/moonicy/gometrics/internal/pkg/floattostr"
 	"net/http"
 	"strings"
 )

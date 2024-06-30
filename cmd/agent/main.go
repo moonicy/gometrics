@@ -10,16 +10,16 @@ import (
 )
 
 func main() {
-	parseFlags()
-	flagRunAddr = http.ParseURI(flagRunAddr)
+	cfg := parseFlags()
+	cfg.Host = http.ParseURI(cfg.Host)
 
-	intPollI, _ := strconv.Atoi(flagPollInterval)
-	intRepI, _ := strconv.Atoi(flagReportInterval)
+	intPollI, _ := strconv.Atoi(cfg.PollInterval)
+	intRepI, _ := strconv.Atoi(cfg.ReportInterval)
 	var pollInterval = time.Duration(intPollI) * time.Second
 	var reportInterval = time.Duration(intRepI) * time.Second
 
 	mem := agent.NewReport()
-	client := metricsClient.NewClient(flagRunAddr)
+	client := metricsClient.NewClient(cfg.Host)
 	reader := agent.NewMetricsReader()
 	var wg sync.WaitGroup
 	wg.Add(2)

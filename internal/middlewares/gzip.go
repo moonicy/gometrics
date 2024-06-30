@@ -1,7 +1,7 @@
 package middlewares
 
 import (
-	"github.com/moonicy/gometrics/internal/gzip"
+	"github.com/moonicy/gometrics/internal/pkg/gzip"
 	"net/http"
 	"strings"
 )

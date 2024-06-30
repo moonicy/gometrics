@@ -1,16 +1,21 @@
 package handlers
 
 import (
+	"context"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
+	"github.com/moonicy/gometrics/internal/config"
+	"github.com/moonicy/gometrics/internal/file"
 	"github.com/moonicy/gometrics/internal/middlewares"
 	"github.com/moonicy/gometrics/internal/storage"
 	"go.uber.org/zap"
 )
 
-func NewRoute(log zap.SugaredLogger) *chi.Mux {
-	mem := storage.NewMemStorage()
-	metricsHandler := NewMetricsHandler(mem)
+func NewRoute(ctx context.Context, log zap.SugaredLogger, cfg config.ServerConfig) *chi.Mux {
+	cm := file.NewConsumer(cfg.FileStoragePath)
+	pr := file.NewProducer(cfg.FileStoragePath)
+	st := storage.NewFileStorage(ctx, cfg, cm, pr)
+	metricsHandler := NewMetricsHandler(st)
 
 	router := chi.NewRouter()
 	router.Route("/", func(r chi.Router) {
