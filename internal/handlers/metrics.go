@@ -1,19 +1,9 @@
 package handlers
 
-import "github.com/moonicy/gometrics/internal/storage"
-
-const (
-	gauge   = "gauge"
-	counter = "counter"
-	mName   = "name"
-	mValue  = "value"
-	mType   = "type"
-)
-
 type MetricsHandler struct {
-	mem storage.MemoryStorage
+	mem Storage
 }
 
-func NewMetricsHandler(mem storage.MemoryStorage) *MetricsHandler {
+func NewMetricsHandler(mem Storage) *MetricsHandler {
 	return &MetricsHandler{mem}
 }
