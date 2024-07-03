@@ -4,7 +4,9 @@ import (
 	"context"
 	"errors"
 	"github.com/moonicy/gometrics/internal/config"
+	"github.com/moonicy/gometrics/internal/file"
 	"github.com/moonicy/gometrics/internal/handlers"
+	"github.com/moonicy/gometrics/internal/storage"
 	"github.com/moonicy/gometrics/pkg/logger"
 	"net/http"
 	"os"
@@ -19,7 +21,13 @@ func main() {
 
 	sugar := logger.NewLogger()
 	ctx, cancel := context.WithCancel(context.Background())
-	route := handlers.NewRoute(ctx, sugar, cfg)
+
+	cm := file.NewConsumer(cfg.FileStoragePath)
+	pr := file.NewProducer(cfg.FileStoragePath)
+	st := storage.NewFileStorage(ctx, cfg, cm, pr)
+	metricsHandler := handlers.NewMetricsHandler(st)
+
+	route := handlers.NewRoute(metricsHandler, sugar)
 
 	var wg sync.WaitGroup
 	wg.Add(1)

@@ -1,12 +1,11 @@
 package client
 
 import (
-	"bytes"
-	"compress/gzip"
 	"encoding/json"
 	"fmt"
 	"github.com/moonicy/gometrics/internal/agent"
 	"github.com/moonicy/gometrics/internal/metrics"
+	"github.com/moonicy/gometrics/pkg/gzip"
 	"log"
 	"net/http"
 )
@@ -31,11 +30,11 @@ func (cl *Client) sendGaugeMetrics(tp string, name string, value float64) string
 		return ""
 	}
 
-	buf := bytes.NewBuffer(nil)
-	zb := gzip.NewWriter(buf)
-	_, _ = zb.Write(out)
-
-	zb.Close()
+	buf, err := gzip.Compress(out)
+	if err != nil {
+		log.Print(err)
+		return ""
+	}
 
 	url := fmt.Sprintf("%s/update/", cl.host)
 	req, err := http.NewRequest("POST", url, buf)
@@ -62,11 +61,11 @@ func (cl *Client) sendCounterMetrics(tp string, name string, delta int64) string
 		return ""
 	}
 
-	buf := bytes.NewBuffer(nil)
-	zb := gzip.NewWriter(buf)
-	_, _ = zb.Write(out)
-
-	zb.Close()
+	buf, err := gzip.Compress(out)
+	if err != nil {
+		log.Print(err)
+		return ""
+	}
 
 	url := fmt.Sprintf("%s/update/", cl.host)
 	req, err := http.NewRequest("POST", url, buf)
