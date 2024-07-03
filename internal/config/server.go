@@ -13,8 +13,8 @@ type ServerConfig struct {
 	Restore         bool
 }
 
-func NewServerConfig() *ServerConfig {
-	sc := &ServerConfig{}
+func NewServerConfig() ServerConfig {
+	sc := ServerConfig{}
 	sc.parseFlag()
 	return sc
 }

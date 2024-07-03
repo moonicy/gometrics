@@ -103,7 +103,13 @@ func (fs *FileStorage) uploadToFile() {
 	fs.mx.Lock()
 	defer fs.mx.Unlock()
 	counter, gauge := fs.GetMetrics()
-	event := file.NewEvent(gauge, counter)
+
+	event := &file.Event{
+		Gauge:     gauge,
+		Counter:   counter,
+		Timestamp: time.Now().Unix(),
+	}
+	
 	err := fs.producer.WriteEvent(event)
 	if err != nil {
 		fmt.Println("Error writing event:", err)

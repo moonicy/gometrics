@@ -18,11 +18,9 @@ func (mh *MetricsHandler) UpdateJSONMetrics(res http.ResponseWriter, req *http.R
 	body, err := io.ReadAll(req.Body)
 	if err != nil {
 		http.Error(res, err.Error(), http.StatusBadRequest)
-		return
 	}
 	if err = json.Unmarshal(body, &mt); err != nil {
 		http.Error(res, err.Error(), http.StatusBadRequest)
-		return
 	}
 
 	if err = mt.Validate(); err != nil {

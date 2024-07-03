@@ -19,7 +19,7 @@ func main() {
 
 	sugar := logger.NewLogger()
 	ctx, cancel := context.WithCancel(context.Background())
-	route := handlers.NewRoute(ctx, sugar, *cfg)
+	route := handlers.NewRoute(ctx, sugar, cfg)
 
 	var wg sync.WaitGroup
 	wg.Add(1)

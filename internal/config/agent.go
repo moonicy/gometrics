@@ -12,8 +12,8 @@ type AgentConfig struct {
 	PollInterval   int
 }
 
-func NewAgentConfig() *AgentConfig {
-	ac := &AgentConfig{}
+func NewAgentConfig() AgentConfig {
+	ac := AgentConfig{}
 	ac.parseFlag()
 	return ac
 }
