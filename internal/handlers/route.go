@@ -6,8 +6,8 @@ import (
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/moonicy/gometrics/internal/config"
 	"github.com/moonicy/gometrics/internal/file"
-	"github.com/moonicy/gometrics/internal/middlewares"
 	"github.com/moonicy/gometrics/internal/storage"
+	"github.com/moonicy/gometrics/pkg/middlewares"
 	"go.uber.org/zap"
 )
 

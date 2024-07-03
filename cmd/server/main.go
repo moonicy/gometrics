@@ -3,8 +3,9 @@ package main
 import (
 	"context"
 	"errors"
+	"github.com/moonicy/gometrics/internal/config"
 	"github.com/moonicy/gometrics/internal/handlers"
-	"github.com/moonicy/gometrics/internal/logger"
+	"github.com/moonicy/gometrics/pkg/logger"
 	"net/http"
 	"os"
 	"os/signal"
@@ -14,10 +15,11 @@ import (
 )
 
 func main() {
-	cfg := parseFlag()
+	cfg := config.NewServerConfig()
+
 	sugar := logger.NewLogger()
 	ctx, cancel := context.WithCancel(context.Background())
-	route := handlers.NewRoute(ctx, sugar, cfg)
+	route := handlers.NewRoute(ctx, sugar, *cfg)
 
 	var wg sync.WaitGroup
 	wg.Add(1)

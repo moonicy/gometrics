@@ -9,7 +9,7 @@ import (
 	"net/http"
 )
 
-func (u *MetricsHandler) PostJSONMetricsByName(res http.ResponseWriter, req *http.Request) {
+func (mh *MetricsHandler) PostJSONMetricsByName(res http.ResponseWriter, req *http.Request) {
 	var mt metrics.MetricName
 
 	res.Header().Set("Content-Type", "application/json")
@@ -33,24 +33,24 @@ func (u *MetricsHandler) PostJSONMetricsByName(res http.ResponseWriter, req *htt
 
 	switch mt.MType {
 	case metrics.Gauge:
-		value, ok := u.mem.GetGauge(mt.ID)
+		value, ok := mh.mem.GetGauge(mt.ID)
 		if !ok {
 			http.Error(res, "Not found", http.StatusNotFound)
 			return
 		}
-		resBody := metrics.Metrics{MetricName: metrics.MetricName{ID: mt.ID, MType: mt.MType}, Value: &value}
+		resBody := metrics.Metric{MetricName: metrics.MetricName{ID: mt.ID, MType: mt.MType}, Value: &value}
 		out, err := json.Marshal(resBody)
 		if err != nil {
 			log.Fatal(err)
 		}
 		res.Write(out)
 	case metrics.Counter:
-		delta, ok := u.mem.GetCounter(mt.ID)
+		delta, ok := mh.mem.GetCounter(mt.ID)
 		if !ok {
 			http.Error(res, "Not found", http.StatusNotFound)
 			return
 		}
-		resBody := metrics.Metrics{MetricName: metrics.MetricName{ID: mt.ID, MType: mt.MType}, Delta: &delta}
+		resBody := metrics.Metric{MetricName: metrics.MetricName{ID: mt.ID, MType: mt.MType}, Delta: &delta}
 		out, err := json.Marshal(resBody)
 		if err != nil {
 			log.Fatal(err)

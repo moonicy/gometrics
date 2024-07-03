@@ -10,8 +10,8 @@ import (
 	"net/http"
 )
 
-func (u *MetricsHandler) UpdateJSONMetrics(res http.ResponseWriter, req *http.Request) {
-	var mt metrics.Metrics
+func (mh *MetricsHandler) UpdateJSONMetrics(res http.ResponseWriter, req *http.Request) {
+	var mt metrics.Metric
 
 	res.Header().Set("Content-Type", "application/json")
 
@@ -36,22 +36,22 @@ func (u *MetricsHandler) UpdateJSONMetrics(res http.ResponseWriter, req *http.Re
 	var delta *int64
 	switch mt.MType {
 	case metrics.Gauge:
-		u.mem.SetGauge(mt.ID, *mt.Value)
-		gv, ok := u.mem.GetGauge(mt.ID)
+		mh.mem.SetGauge(mt.ID, *mt.Value)
+		gv, ok := mh.mem.GetGauge(mt.ID)
 		if ok {
 			value = &gv
 		}
 		fmt.Printf("%s\t%s\t%f\n", mt.ID, mt.MType, *mt.Value)
 	case metrics.Counter:
-		u.mem.AddCounter(mt.ID, *mt.Delta)
-		cv, ok := u.mem.GetCounter(mt.ID)
+		mh.mem.AddCounter(mt.ID, *mt.Delta)
+		cv, ok := mh.mem.GetCounter(mt.ID)
 		if ok {
 			delta = &cv
 		}
 		fmt.Printf("%s\t%s\t%d\n", mt.ID, mt.MType, *mt.Delta)
 	}
 
-	resBody := metrics.Metrics{MetricName: metrics.MetricName{ID: mt.ID, MType: mt.MType}, Value: value, Delta: delta}
+	resBody := metrics.Metric{MetricName: metrics.MetricName{ID: mt.ID, MType: mt.MType}, Value: value, Delta: delta}
 	out, err := json.Marshal(resBody)
 	if err != nil {
 		log.Fatal(err)

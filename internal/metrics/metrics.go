@@ -13,7 +13,7 @@ type MetricName struct {
 	MType string `json:"type"` // параметр, принимающий значение gauge или counter
 }
 
-type Metrics struct {
+type Metric struct {
 	MetricName
 	Delta *int64   `json:"delta,omitempty"` // значение метрики в случае передачи counter
 	Value *float64 `json:"value,omitempty"` // значение метрики в случае передачи gauge
@@ -29,7 +29,7 @@ func (mn MetricName) Validate() error {
 	return nil
 }
 
-func (m Metrics) Validate() error {
+func (m Metric) Validate() error {
 	if err := m.MetricName.Validate(); err != nil {
 		return err
 	}
