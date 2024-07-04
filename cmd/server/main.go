@@ -24,7 +24,12 @@ func main() {
 
 	cm := file.NewConsumer(cfg.FileStoragePath)
 	pr := file.NewProducer(cfg.FileStoragePath)
-	st := storage.NewFileStorage(ctx, cfg, cm, pr)
+	st := storage.NewFileStorage(cfg, cm, pr)
+	if cfg.Restore {
+		st.Restore()
+	}
+	st.RunSync()
+	st.WaitShutDown(ctx)
 	metricsHandler := handlers.NewMetricsHandler(st)
 
 	route := handlers.NewRoute(metricsHandler, sugar)

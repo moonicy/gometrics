@@ -29,47 +29,14 @@ type FileStorage struct {
 	mx       sync.Mutex
 }
 
-func NewFileStorage(ctx context.Context, cfg config.ServerConfig, consumer Consumer, producer Producer) *FileStorage {
+func NewFileStorage(cfg config.ServerConfig, consumer Consumer, producer Producer) *FileStorage {
 	mem := NewMemStorage()
-	if cfg.Restore {
-		err := consumer.Open()
-		if err != nil {
-			panic(err)
-		}
-		data, err := consumer.ReadEvent()
-		if err != nil {
-			panic(err)
-		}
-		err = consumer.Close()
-		if err != nil {
-			panic(err)
-		}
-		if data != nil {
-			mem.gauge = data.Gauge
-			mem.counter = data.Counter
-		}
-	}
-	err := producer.Open()
-	if err != nil {
-		panic(err)
-	}
 	fs := &FileStorage{
 		mem:      mem,
 		consumer: consumer,
 		producer: producer,
 		cfg:      cfg,
 	}
-	if cfg.StoreInternal != 0 {
-		fs.runSync()
-	}
-	go func() {
-		<-ctx.Done()
-		fs.uploadToFile()
-		err = fs.producer.Close()
-		if err != nil {
-			panic(err)
-		}
-	}()
 	return fs
 }
 
@@ -109,16 +76,51 @@ func (fs *FileStorage) uploadToFile() {
 		Counter:   counter,
 		Timestamp: time.Now().Unix(),
 	}
-	
-	err := fs.producer.WriteEvent(event)
+
+	err := fs.producer.Open()
+	if err != nil {
+		panic(err)
+	}
+	defer fs.producer.Close()
+
+	err = fs.producer.WriteEvent(event)
 	if err != nil {
 		fmt.Println("Error writing event:", err)
 	}
 }
 
-func (fs *FileStorage) runSync() {
+func (fs *FileStorage) RunSync() {
+	if fs.cfg.StoreInternal == 0 {
+		return
+	}
 	go func() {
 		time.Sleep(time.Duration(fs.cfg.StoreInternal) * time.Second)
+		fs.uploadToFile()
+	}()
+}
+
+func (fs *FileStorage) Restore() {
+	err := fs.consumer.Open()
+	if err != nil {
+		panic(err)
+	}
+	data, err := fs.consumer.ReadEvent()
+	if err != nil {
+		panic(err)
+	}
+	err = fs.consumer.Close()
+	if err != nil {
+		panic(err)
+	}
+	if data != nil {
+		fs.mem.gauge = data.Gauge
+		fs.mem.counter = data.Counter
+	}
+}
+
+func (fs *FileStorage) WaitShutDown(ctx context.Context) {
+	go func() {
+		<-ctx.Done()
 		fs.uploadToFile()
 	}()
 }
