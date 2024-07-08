@@ -3,12 +3,12 @@ package handlers
 import (
 	"fmt"
 	"github.com/go-chi/chi/v5"
-	"github.com/moonicy/gometrics/internal/floattostr"
 	"github.com/moonicy/gometrics/internal/metrics"
+	"github.com/moonicy/gometrics/pkg/floattostr"
 	"net/http"
 )
 
-func (u *MetricsHandler) GetMetricsByName(res http.ResponseWriter, req *http.Request) {
+func (mh *MetricsHandler) GetMetricsByName(res http.ResponseWriter, req *http.Request) {
 	name := chi.URLParam(req, metrics.MName)
 	tp := chi.URLParam(req, metrics.MType)
 
@@ -18,7 +18,7 @@ func (u *MetricsHandler) GetMetricsByName(res http.ResponseWriter, req *http.Req
 
 	switch tp {
 	case metrics.Gauge:
-		value, ok := u.mem.GetGauge(name)
+		value, ok := mh.mem.GetGauge(name)
 		if !ok {
 			http.Error(res, "Not found", http.StatusNotFound)
 			return
@@ -28,7 +28,7 @@ func (u *MetricsHandler) GetMetricsByName(res http.ResponseWriter, req *http.Req
 			http.Error(res, "Internal Error", http.StatusInternalServerError)
 		}
 	case metrics.Counter:
-		value, ok := u.mem.GetCounter(name)
+		value, ok := mh.mem.GetCounter(name)
 		if !ok {
 			http.Error(res, "Not found", http.StatusNotFound)
 			return

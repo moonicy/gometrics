@@ -1,12 +1,11 @@
 package client
 
 import (
-	"bytes"
-	"compress/gzip"
 	"encoding/json"
 	"fmt"
 	"github.com/moonicy/gometrics/internal/agent"
 	"github.com/moonicy/gometrics/internal/metrics"
+	"github.com/moonicy/gometrics/pkg/gzip"
 	"log"
 	"net/http"
 )
@@ -24,18 +23,18 @@ func NewClient(host string) *Client {
 }
 
 func (cl *Client) sendGaugeMetrics(tp string, name string, value float64) string {
-	body := metrics.Metrics{MetricName: metrics.MetricName{ID: name, MType: tp}, Value: &value}
+	body := metrics.Metric{MetricName: metrics.MetricName{ID: name, MType: tp}, Value: &value}
 	out, err := json.Marshal(body)
 	if err != nil {
 		log.Print(err)
 		return ""
 	}
 
-	buf := bytes.NewBuffer(nil)
-	zb := gzip.NewWriter(buf)
-	_, _ = zb.Write(out)
-
-	zb.Close()
+	buf, err := gzip.Compress(out)
+	if err != nil {
+		log.Print(err)
+		return ""
+	}
 
 	url := fmt.Sprintf("%s/update/", cl.host)
 	req, err := http.NewRequest("POST", url, buf)
@@ -55,18 +54,18 @@ func (cl *Client) sendGaugeMetrics(tp string, name string, value float64) string
 }
 
 func (cl *Client) sendCounterMetrics(tp string, name string, delta int64) string {
-	body := metrics.Metrics{MetricName: metrics.MetricName{ID: name, MType: tp}, Delta: &delta}
+	body := metrics.Metric{MetricName: metrics.MetricName{ID: name, MType: tp}, Delta: &delta}
 	out, err := json.Marshal(body)
 	if err != nil {
 		log.Print(err)
 		return ""
 	}
 
-	buf := bytes.NewBuffer(nil)
-	zb := gzip.NewWriter(buf)
-	_, _ = zb.Write(out)
-
-	zb.Close()
+	buf, err := gzip.Compress(out)
+	if err != nil {
+		log.Print(err)
+		return ""
+	}
 
 	url := fmt.Sprintf("%s/update/", cl.host)
 	req, err := http.NewRequest("POST", url, buf)

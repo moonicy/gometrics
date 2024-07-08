@@ -2,14 +2,14 @@ package handlers
 
 import (
 	"fmt"
-	"github.com/moonicy/gometrics/internal/floattostr"
+	"github.com/moonicy/gometrics/pkg/floattostr"
 	"net/http"
 	"strings"
 )
 
-func (u *MetricsHandler) GetMetrics(res http.ResponseWriter, _ *http.Request) {
+func (mh *MetricsHandler) GetMetrics(res http.ResponseWriter, _ *http.Request) {
 	res.Header().Set("Content-Type", "text/html")
-	gotCounter, gotGauge := u.mem.GetMetrics()
+	gotCounter, gotGauge := mh.mem.GetMetrics()
 	builder := strings.Builder{}
 	for k, v := range gotCounter {
 		builder.WriteString(fmt.Sprintf("%s: %d\n", k, v))

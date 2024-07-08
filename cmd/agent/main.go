@@ -3,23 +3,21 @@ package main
 import (
 	"github.com/moonicy/gometrics/internal/agent"
 	metricsClient "github.com/moonicy/gometrics/internal/client"
-	"github.com/moonicy/gometrics/internal/http"
-	"strconv"
+	"github.com/moonicy/gometrics/internal/config"
 	"sync"
 	"time"
 )
 
 func main() {
-	parseFlags()
-	flagRunAddr = http.ParseURI(flagRunAddr)
+	cfg := config.NewAgentConfig()
 
-	intPollI, _ := strconv.Atoi(flagPollInterval)
-	intRepI, _ := strconv.Atoi(flagReportInterval)
-	var pollInterval = time.Duration(intPollI) * time.Second
-	var reportInterval = time.Duration(intRepI) * time.Second
+	cfg.Host = config.ParseURI(cfg.Host)
+
+	var pollInterval = time.Duration(cfg.PollInterval) * time.Second
+	var reportInterval = time.Duration(cfg.ReportInterval) * time.Second
 
 	mem := agent.NewReport()
-	client := metricsClient.NewClient(flagRunAddr)
+	client := metricsClient.NewClient(cfg.Host)
 	reader := agent.NewMetricsReader()
 	var wg sync.WaitGroup
 	wg.Add(2)
