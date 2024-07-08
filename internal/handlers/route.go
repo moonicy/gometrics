@@ -15,6 +15,7 @@ func NewRoute(log zap.SugaredLogger) *chi.Mux {
 	router := chi.NewRouter()
 	router.Route("/", func(r chi.Router) {
 		r.Use(middleware.StripSlashes)
+		r.Use(middlewares.GzipMiddleware)
 		r.Use(middlewares.WithLogging(log))
 		r.Get("/", metricsHandler.GetMetrics)
 		r.Route("/value", func(r chi.Router) {
