@@ -1,5 +1,7 @@
 package handlers
 
+import "database/sql"
+
 type Storage interface {
 	SetGauge(key string, value float64)
 	AddCounter(key string, value int64)
@@ -10,8 +12,9 @@ type Storage interface {
 
 type MetricsHandler struct {
 	mem Storage
+	db  *sql.DB
 }
 
-func NewMetricsHandler(mem Storage) *MetricsHandler {
-	return &MetricsHandler{mem}
+func NewMetricsHandler(mem Storage, db *sql.DB) *MetricsHandler {
+	return &MetricsHandler{mem, db}
 }

@@ -22,6 +22,7 @@ func NewRoute(mh *MetricsHandler, log zap.SugaredLogger) *chi.Mux {
 			r.Post("/", mh.UpdateJSONMetrics)
 			r.Post("/{type}/{name}/{value}", mh.UpdateMetrics)
 		})
+		r.Get("/ping", mh.GetPing)
 	})
 
 	return router

@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"database/sql"
 	"errors"
 	"github.com/moonicy/gometrics/internal/config"
 	"github.com/moonicy/gometrics/internal/file"
@@ -22,6 +23,12 @@ func main() {
 	sugar := logger.NewLogger()
 	ctx, cancel := context.WithCancel(context.Background())
 
+	db, err := sql.Open("pgx", cfg.DatabaseDsn)
+	if err != nil {
+		sugar.Error(err)
+	}
+	defer db.Close()
+
 	cm := file.NewConsumer(cfg.FileStoragePath)
 	pr := file.NewProducer(cfg.FileStoragePath)
 	st := storage.NewFileStorage(cfg, cm, pr)
@@ -30,7 +37,7 @@ func main() {
 	}
 	st.RunSync()
 	st.WaitShutDown(ctx)
-	metricsHandler := handlers.NewMetricsHandler(st)
+	metricsHandler := handlers.NewMetricsHandler(st, db)
 
 	route := handlers.NewRoute(metricsHandler, sugar)
 
