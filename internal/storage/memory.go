@@ -1,6 +1,12 @@
 package storage
 
-import "sync"
+import (
+	"context"
+	"errors"
+	"sync"
+)
+
+var ErrNotFound = errors.New("not found")
 
 type MemStorage struct {
 	gauge   map[string]float64
@@ -15,33 +21,45 @@ func NewMemStorage() *MemStorage {
 	}
 }
 
-func (ms *MemStorage) SetGauge(key string, value float64) {
+func (ms *MemStorage) Init(_ context.Context) error {
+	return nil
+}
+
+func (ms *MemStorage) SetGauge(_ context.Context, key string, value float64) error {
 	ms.mx.Lock()
 	defer ms.mx.Unlock()
 	ms.gauge[key] = value
+	return nil
 }
 
-func (ms *MemStorage) AddCounter(key string, value int64) {
+func (ms *MemStorage) AddCounter(_ context.Context, key string, value int64) error {
 	ms.mx.Lock()
 	defer ms.mx.Unlock()
 	ms.counter[key] += value
+	return nil
 }
 
-func (ms *MemStorage) GetCounter(key string) (value int64, ok bool) {
+func (ms *MemStorage) GetCounter(_ context.Context, key string) (value int64, err error) {
 	ms.mx.Lock()
 	defer ms.mx.Unlock()
-	value, ok = ms.counter[key]
-	return value, ok
+	value, ok := ms.counter[key]
+	if !ok {
+		return 0, ErrNotFound
+	}
+	return value, nil
 }
 
-func (ms *MemStorage) GetGauge(key string) (value float64, ok bool) {
+func (ms *MemStorage) GetGauge(_ context.Context, key string) (value float64, err error) {
 	ms.mx.Lock()
 	defer ms.mx.Unlock()
-	value, ok = ms.gauge[key]
-	return value, ok
+	value, ok := ms.gauge[key]
+	if !ok {
+		return 0, ErrNotFound
+	}
+	return value, nil
 }
 
-func (ms *MemStorage) GetMetrics() (counter map[string]int64, gauge map[string]float64) {
+func (ms *MemStorage) GetMetrics(_ context.Context) (counter map[string]int64, gauge map[string]float64, err error) {
 	ms.mx.Lock()
 	defer ms.mx.Unlock()
 	counter = make(map[string]int64, len(ms.gauge))
@@ -52,5 +70,5 @@ func (ms *MemStorage) GetMetrics() (counter map[string]int64, gauge map[string]f
 	for k, v := range ms.counter {
 		counter[k] = v
 	}
-	return counter, gauge
+	return counter, gauge, nil
 }

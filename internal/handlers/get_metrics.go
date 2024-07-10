@@ -7,9 +7,13 @@ import (
 	"strings"
 )
 
-func (mh *MetricsHandler) GetMetrics(res http.ResponseWriter, _ *http.Request) {
+func (mh *MetricsHandler) GetMetrics(res http.ResponseWriter, req *http.Request) {
 	res.Header().Set("Content-Type", "text/html")
-	gotCounter, gotGauge := mh.mem.GetMetrics()
+	gotCounter, gotGauge, err := mh.mem.GetMetrics(req.Context())
+	if err != nil {
+		http.Error(res, err.Error(), http.StatusInternalServerError)
+		return
+	}
 	builder := strings.Builder{}
 	for k, v := range gotCounter {
 		builder.WriteString(fmt.Sprintf("%s: %d\n", k, v))
@@ -17,7 +21,7 @@ func (mh *MetricsHandler) GetMetrics(res http.ResponseWriter, _ *http.Request) {
 	for k, v := range gotGauge {
 		builder.WriteString(fmt.Sprintf("%s: %s\n", k, floattostr.FloatToString(v)))
 	}
-	_, err := res.Write([]byte(builder.String()))
+	_, err = res.Write([]byte(builder.String()))
 	if err != nil {
 		http.Error(res, "Internal Error", http.StatusInternalServerError)
 	}

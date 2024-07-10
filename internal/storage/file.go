@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/moonicy/gometrics/internal/config"
 	"github.com/moonicy/gometrics/internal/file"
+	"log"
 	"sync"
 	"time"
 )
@@ -40,36 +41,63 @@ func NewFileStorage(cfg config.ServerConfig, consumer Consumer, producer Produce
 	return fs
 }
 
-func (fs *FileStorage) SetGauge(key string, value float64) {
-	fs.mem.SetGauge(key, value)
-	if fs.cfg.StoreInternal == 0 {
-		fs.uploadToFile()
+func (fs *FileStorage) Init(ctx context.Context) error {
+	if fs.cfg.Restore {
+		fs.Restore()
 	}
+	fs.RunSync()
+	fs.WaitShutDown(ctx)
+
+	return nil
 }
 
-func (fs *FileStorage) AddCounter(key string, value int64) {
-	fs.mem.AddCounter(key, value)
-	if fs.cfg.StoreInternal == 0 {
-		fs.uploadToFile()
+func (fs *FileStorage) SetGauge(ctx context.Context, key string, value float64) error {
+	err := fs.mem.SetGauge(ctx, key, value)
+	if err != nil {
+		return err
 	}
+	if fs.cfg.StoreInternal == 0 {
+		err := fs.uploadToFile(ctx)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
-func (fs *FileStorage) GetCounter(key string) (int64, bool) {
-	return fs.mem.GetCounter(key)
+func (fs *FileStorage) AddCounter(ctx context.Context, key string, value int64) error {
+	err := fs.mem.AddCounter(ctx, key, value)
+	if err != nil {
+		return err
+	}
+	if fs.cfg.StoreInternal == 0 {
+		err := fs.uploadToFile(ctx)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
-func (fs *FileStorage) GetGauge(key string) (float64, bool) {
-	return fs.mem.GetGauge(key)
+func (fs *FileStorage) GetCounter(ctx context.Context, key string) (int64, error) {
+	return fs.mem.GetCounter(ctx, key)
 }
 
-func (fs *FileStorage) GetMetrics() (map[string]int64, map[string]float64) {
-	return fs.mem.GetMetrics()
+func (fs *FileStorage) GetGauge(ctx context.Context, key string) (float64, error) {
+	return fs.mem.GetGauge(ctx, key)
 }
 
-func (fs *FileStorage) uploadToFile() {
+func (fs *FileStorage) GetMetrics(ctx context.Context) (map[string]int64, map[string]float64, error) {
+	return fs.mem.GetMetrics(ctx)
+}
+
+func (fs *FileStorage) uploadToFile(ctx context.Context) error {
 	fs.mx.Lock()
 	defer fs.mx.Unlock()
-	counter, gauge := fs.GetMetrics()
+	counter, gauge, err := fs.GetMetrics(ctx)
+	if err != nil {
+		return err
+	}
 
 	event := &file.Event{
 		Gauge:     gauge,
@@ -77,9 +105,9 @@ func (fs *FileStorage) uploadToFile() {
 		Timestamp: time.Now().Unix(),
 	}
 
-	err := fs.producer.Open()
+	err = fs.producer.Open()
 	if err != nil {
-		panic(err)
+		return err
 	}
 	defer fs.producer.Close()
 
@@ -87,6 +115,7 @@ func (fs *FileStorage) uploadToFile() {
 	if err != nil {
 		fmt.Println("Error writing event:", err)
 	}
+	return nil
 }
 
 func (fs *FileStorage) RunSync() {
@@ -95,7 +124,10 @@ func (fs *FileStorage) RunSync() {
 	}
 	go func() {
 		time.Sleep(time.Duration(fs.cfg.StoreInternal) * time.Second)
-		fs.uploadToFile()
+		err := fs.uploadToFile(context.Background())
+		if err != nil {
+			log.Println("Error uploading file:", err)
+		}
 	}()
 }
 
@@ -121,6 +153,9 @@ func (fs *FileStorage) Restore() {
 func (fs *FileStorage) WaitShutDown(ctx context.Context) {
 	go func() {
 		<-ctx.Done()
-		fs.uploadToFile()
+		err := fs.uploadToFile(context.Background())
+		if err != nil {
+			panic(err)
+		}
 	}()
 }

@@ -1,13 +1,19 @@
 package handlers
 
-import "database/sql"
+import (
+	"context"
+	"database/sql"
+	"github.com/moonicy/gometrics/internal/config"
+	"github.com/moonicy/gometrics/internal/storage"
+)
 
 type Storage interface {
-	SetGauge(key string, value float64)
-	AddCounter(key string, value int64)
-	GetCounter(key string) (value int64, ok bool)
-	GetGauge(key string) (value float64, ok bool)
-	GetMetrics() (counter map[string]int64, gauge map[string]float64)
+	Init(ctx context.Context) error
+	SetGauge(ctx context.Context, key string, value float64) error
+	AddCounter(ctx context.Context, key string, value int64) error
+	GetCounter(ctx context.Context, key string) (value int64, err error)
+	GetGauge(ctx context.Context, key string) (value float64, err error)
+	GetMetrics(ctx context.Context) (counter map[string]int64, gauge map[string]float64, err error)
 }
 
 type MetricsHandler struct {
@@ -17,4 +23,13 @@ type MetricsHandler struct {
 
 func NewMetricsHandler(mem Storage, db *sql.DB) *MetricsHandler {
 	return &MetricsHandler{mem, db}
+}
+
+func NewStorage(cfg config.ServerConfig, db *sql.DB, cr storage.Consumer, pr storage.Producer) Storage {
+	if cfg.DatabaseDsn != "" {
+		return storage.NewDBStorage(db)
+	} else if cfg.FileStoragePath != "" {
+		return storage.NewFileStorage(cfg, cr, pr)
+	}
+	return storage.NewMemStorage()
 }

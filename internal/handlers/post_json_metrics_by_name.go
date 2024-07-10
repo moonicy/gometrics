@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"github.com/moonicy/gometrics/internal/metrics"
+	"github.com/moonicy/gometrics/internal/storage"
 	"io"
 	"log"
 	"net/http"
@@ -33,9 +34,13 @@ func (mh *MetricsHandler) PostJSONMetricsByName(res http.ResponseWriter, req *ht
 
 	switch mt.MType {
 	case metrics.Gauge:
-		value, ok := mh.mem.GetGauge(mt.ID)
-		if !ok {
-			http.Error(res, "Not found", http.StatusNotFound)
+		value, err := mh.mem.GetGauge(req.Context(), mt.ID)
+		if err != nil {
+			if errors.Is(err, storage.ErrNotFound) {
+				http.Error(res, "Not found", http.StatusNotFound)
+				return
+			}
+			http.Error(res, err.Error(), http.StatusInternalServerError)
 			return
 		}
 		resBody := metrics.Metric{MetricName: metrics.MetricName{ID: mt.ID, MType: mt.MType}, Value: &value}
@@ -45,9 +50,13 @@ func (mh *MetricsHandler) PostJSONMetricsByName(res http.ResponseWriter, req *ht
 		}
 		res.Write(out)
 	case metrics.Counter:
-		delta, ok := mh.mem.GetCounter(mt.ID)
-		if !ok {
-			http.Error(res, "Not found", http.StatusNotFound)
+		delta, err := mh.mem.GetCounter(req.Context(), mt.ID)
+		if err != nil {
+			if errors.Is(err, storage.ErrNotFound) {
+				http.Error(res, "Not found", http.StatusNotFound)
+				return
+			}
+			http.Error(res, err.Error(), http.StatusInternalServerError)
 			return
 		}
 		resBody := metrics.Metric{MetricName: metrics.MetricName{ID: mt.ID, MType: mt.MType}, Delta: &delta}

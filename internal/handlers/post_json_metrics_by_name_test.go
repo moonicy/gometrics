@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"github.com/go-chi/chi/v5"
 	"github.com/moonicy/gometrics/internal/agent"
@@ -14,11 +15,12 @@ import (
 )
 
 func TestMetricsHandler_GetJSONMetricsByName(t *testing.T) {
+	ctx := context.Background()
 	defaultMemStorage := storage.NewMemStorage()
 	presetMemStorage := func() Storage {
 		mem := storage.NewMemStorage()
-		mem.AddCounter(agent.Alloc, 22)
-		mem.SetGauge(agent.Frees, 22)
+		mem.AddCounter(ctx, agent.Alloc, 22)
+		mem.SetGauge(ctx, agent.Frees, 22)
 		return mem
 	}
 	tests := []struct {

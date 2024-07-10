@@ -23,9 +23,9 @@ func NewServerConfig() ServerConfig {
 func (sc *ServerConfig) parseFlag() {
 	flag.StringVar(&sc.Host, "a", DefaultHost, "address and port to run server")
 	flag.IntVar(&sc.StoreInternal, "i", 300, "store interval")
-	flag.StringVar(&sc.FileStoragePath, "f", "/tmp/metrics-db.json", "file storage path")
+	flag.StringVar(&sc.FileStoragePath, "f", "", "file storage path")
 	flag.BoolVar(&sc.Restore, "r", true, "restore")
-	flag.StringVar(&sc.DatabaseDsn, "d", "host=localhost port=5432 user=mila password=qwerty dbname=metrics sslmode=disable", "database dsn")
+	flag.StringVar(&sc.DatabaseDsn, "d", "", "database dsn")
 	flag.Parse()
 
 	if envRunAddr := os.Getenv("ADDRESS"); envRunAddr != "" {
