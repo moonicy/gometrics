@@ -91,6 +91,10 @@ func (fs *FileStorage) GetMetrics(ctx context.Context) (map[string]int64, map[st
 	return fs.mem.GetMetrics(ctx)
 }
 
+func (fs *FileStorage) SetMetrics(ctx context.Context, counter map[string]int64, gauge map[string]float64) error {
+	return fs.mem.SetMetrics(ctx, counter, gauge)
+}
+
 func (fs *FileStorage) uploadToFile(ctx context.Context) error {
 	fs.mx.Lock()
 	defer fs.mx.Unlock()

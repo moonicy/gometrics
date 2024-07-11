@@ -8,7 +8,7 @@ import (
 	"strconv"
 )
 
-func (mh *MetricsHandler) UpdateMetrics(res http.ResponseWriter, req *http.Request) {
+func (mh *MetricsHandler) UpdateMetric(res http.ResponseWriter, req *http.Request) {
 	name := chi.URLParam(req, metrics.MName)
 	val := chi.URLParam(req, metrics.MValue)
 	tp := chi.URLParam(req, metrics.MType)
@@ -24,7 +24,7 @@ func (mh *MetricsHandler) UpdateMetrics(res http.ResponseWriter, req *http.Reque
 			http.Error(res, "Value is not a valid float64", http.StatusBadRequest)
 			return
 		}
-		err = mh.mem.SetGauge(req.Context(), name, valFloat)
+		err = mh.storage.SetGauge(req.Context(), name, valFloat)
 		if err != nil {
 			http.Error(res, err.Error(), http.StatusInternalServerError)
 			return
@@ -35,7 +35,7 @@ func (mh *MetricsHandler) UpdateMetrics(res http.ResponseWriter, req *http.Reque
 			http.Error(res, "Value is not a valid int64", http.StatusBadRequest)
 			return
 		}
-		err = mh.mem.AddCounter(req.Context(), name, valInt)
+		err = mh.storage.AddCounter(req.Context(), name, valInt)
 		if err != nil {
 			http.Error(res, err.Error(), http.StatusInternalServerError)
 			return

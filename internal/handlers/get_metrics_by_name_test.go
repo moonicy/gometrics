@@ -41,7 +41,7 @@ func TestMetricsHandler_GetMetricsByName(t *testing.T) {
 			}
 
 			u := &MetricsHandler{
-				mem: tt.mem,
+				storage: tt.mem,
 			}
 
 			rec := httptest.NewRecorder()

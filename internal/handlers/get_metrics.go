@@ -9,7 +9,7 @@ import (
 
 func (mh *MetricsHandler) GetMetrics(res http.ResponseWriter, req *http.Request) {
 	res.Header().Set("Content-Type", "text/html")
-	gotCounter, gotGauge, err := mh.mem.GetMetrics(req.Context())
+	gotCounter, gotGauge, err := mh.storage.GetMetrics(req.Context())
 	if err != nil {
 		http.Error(res, err.Error(), http.StatusInternalServerError)
 		return

@@ -23,7 +23,7 @@ func TestMetricsHandler_GetMetrics(t *testing.T) {
 	mem.SetGauge(ctx, agent.Frees, 22)
 
 	u := &MetricsHandler{
-		mem: mem,
+		storage: mem,
 	}
 
 	rec := httptest.NewRecorder()

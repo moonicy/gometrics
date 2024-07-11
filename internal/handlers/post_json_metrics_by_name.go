@@ -20,6 +20,9 @@ func (mh *MetricsHandler) PostJSONMetricsByName(res http.ResponseWriter, req *ht
 		http.Error(res, err.Error(), http.StatusBadRequest)
 		return
 	}
+	if mh.logger != nil {
+		mh.logger.Infoln(string(body))
+	}
 	if err = json.Unmarshal(body, &mt); err != nil {
 		http.Error(res, err.Error(), http.StatusBadRequest)
 		return
@@ -34,7 +37,7 @@ func (mh *MetricsHandler) PostJSONMetricsByName(res http.ResponseWriter, req *ht
 
 	switch mt.MType {
 	case metrics.Gauge:
-		value, err := mh.mem.GetGauge(req.Context(), mt.ID)
+		value, err := mh.storage.GetGauge(req.Context(), mt.ID)
 		if err != nil {
 			if errors.Is(err, storage.ErrNotFound) {
 				http.Error(res, "Not found", http.StatusNotFound)
@@ -50,7 +53,7 @@ func (mh *MetricsHandler) PostJSONMetricsByName(res http.ResponseWriter, req *ht
 		}
 		res.Write(out)
 	case metrics.Counter:
-		delta, err := mh.mem.GetCounter(req.Context(), mt.ID)
+		delta, err := mh.storage.GetCounter(req.Context(), mt.ID)
 		if err != nil {
 			if errors.Is(err, storage.ErrNotFound) {
 				http.Error(res, "Not found", http.StatusNotFound)

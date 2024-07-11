@@ -34,12 +34,12 @@ func TestUpdateMetrics_updateMetrics(t *testing.T) {
 			}
 
 			u := &MetricsHandler{
-				mem: storage.NewMemStorage(),
+				storage: storage.NewMemStorage(),
 			}
 
 			rec := httptest.NewRecorder()
 			r := chi.NewRouter()
-			r.Post("/update/{type}/{name}/{value}", u.UpdateMetrics)
+			r.Post("/update/{type}/{name}/{value}", u.UpdateMetric)
 			r.ServeHTTP(rec, req)
 
 			resp := rec.Result()

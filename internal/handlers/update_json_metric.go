@@ -10,7 +10,7 @@ import (
 	"net/http"
 )
 
-func (mh *MetricsHandler) UpdateJSONMetrics(res http.ResponseWriter, req *http.Request) {
+func (mh *MetricsHandler) UpdateJSONMetric(res http.ResponseWriter, req *http.Request) {
 	var mt metrics.Metric
 
 	res.Header().Set("Content-Type", "application/json")
@@ -34,12 +34,12 @@ func (mh *MetricsHandler) UpdateJSONMetrics(res http.ResponseWriter, req *http.R
 	var delta *int64
 	switch mt.MType {
 	case metrics.Gauge:
-		err := mh.mem.SetGauge(req.Context(), mt.ID, *mt.Value)
+		err := mh.storage.SetGauge(req.Context(), mt.ID, *mt.Value)
 		if err != nil {
 			http.Error(res, err.Error(), http.StatusInternalServerError)
 			return
 		}
-		gv, err := mh.mem.GetGauge(req.Context(), mt.ID)
+		gv, err := mh.storage.GetGauge(req.Context(), mt.ID)
 		if err != nil {
 			if errors.Is(err, metrics.ErrNotFound) {
 				break
@@ -50,12 +50,12 @@ func (mh *MetricsHandler) UpdateJSONMetrics(res http.ResponseWriter, req *http.R
 		value = &gv
 		fmt.Printf("%s\t%s\t%f\n", mt.ID, mt.MType, *mt.Value)
 	case metrics.Counter:
-		err := mh.mem.AddCounter(req.Context(), mt.ID, *mt.Delta)
+		err := mh.storage.AddCounter(req.Context(), mt.ID, *mt.Delta)
 		if err != nil {
 			http.Error(res, err.Error(), http.StatusInternalServerError)
 			return
 		}
-		cv, err := mh.mem.GetCounter(req.Context(), mt.ID)
+		cv, err := mh.storage.GetCounter(req.Context(), mt.ID)
 		if err != nil {
 			if errors.Is(err, metrics.ErrNotFound) {
 				break

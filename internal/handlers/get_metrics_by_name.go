@@ -13,6 +13,9 @@ import (
 func (mh *MetricsHandler) GetMetricsByName(res http.ResponseWriter, req *http.Request) {
 	name := chi.URLParam(req, metrics.MName)
 	tp := chi.URLParam(req, metrics.MType)
+	if mh.logger != nil {
+		mh.logger.Infoln(name, tp)
+	}
 
 	if name == "" {
 		http.Error(res, "Not found", http.StatusNotFound)
@@ -20,7 +23,7 @@ func (mh *MetricsHandler) GetMetricsByName(res http.ResponseWriter, req *http.Re
 
 	switch tp {
 	case metrics.Gauge:
-		value, err := mh.mem.GetGauge(req.Context(), name)
+		value, err := mh.storage.GetGauge(req.Context(), name)
 		if err != nil {
 			if errors.Is(err, storage.ErrNotFound) {
 				http.Error(res, "Not found", http.StatusNotFound)
@@ -34,7 +37,7 @@ func (mh *MetricsHandler) GetMetricsByName(res http.ResponseWriter, req *http.Re
 			http.Error(res, "Internal Error", http.StatusInternalServerError)
 		}
 	case metrics.Counter:
-		value, err := mh.mem.GetCounter(req.Context(), name)
+		value, err := mh.storage.GetCounter(req.Context(), name)
 		if err != nil {
 			if errors.Is(err, storage.ErrNotFound) {
 				http.Error(res, "Not found", http.StatusNotFound)
