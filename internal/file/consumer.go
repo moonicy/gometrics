@@ -3,6 +3,7 @@ package file
 import (
 	"bufio"
 	"encoding/json"
+	"github.com/moonicy/gometrics/pkg/retry"
 	"os"
 )
 
@@ -17,7 +18,17 @@ func NewConsumer(filename string) *Consumer {
 }
 
 func (c *Consumer) Open() error {
-	file, err := os.OpenFile(c.filename, os.O_RDONLY|os.O_CREATE, 0666)
+	var file *os.File
+	var err error
+	err = retry.RetryHandle(func() error {
+		file, err = os.OpenFile(c.filename, os.O_RDONLY|os.O_CREATE, 0666)
+		if err != nil {
+			if os.IsPermission(err) {
+				return retry.NewRetryableError(err.Error())
+			}
+		}
+		return err
+	})
 	if err != nil {
 		return err
 	}

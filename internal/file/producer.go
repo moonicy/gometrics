@@ -3,6 +3,7 @@ package file
 import (
 	"bufio"
 	"encoding/json"
+	"github.com/moonicy/gometrics/pkg/retry"
 	"os"
 )
 
@@ -17,7 +18,17 @@ func NewProducer(filename string) *Producer {
 }
 
 func (p *Producer) Open() error {
-	file, err := os.OpenFile(p.filename, os.O_WRONLY|os.O_CREATE, 0666)
+	var file *os.File
+	var err error
+	err = retry.RetryHandle(func() error {
+		file, err = os.OpenFile(p.filename, os.O_WRONLY|os.O_CREATE, 0666)
+		if err != nil {
+			if os.IsPermission(err) {
+				return retry.NewRetryableError(err.Error())
+			}
+		}
+		return err
+	})
 	if err != nil {
 		return err
 	}

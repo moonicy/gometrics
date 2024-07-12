@@ -22,7 +22,7 @@ func NewAgentConfig() AgentConfig {
 func (ac *AgentConfig) parseFlag() {
 	var err error
 	flag.StringVar(&ac.Host, "a", DefaultHost, "address and port to run server")
-	flag.IntVar(&ac.ReportInterval, "r", 10, "report interval")
+	flag.IntVar(&ac.ReportInterval, "r", 20, "report interval")
 	flag.IntVar(&ac.PollInterval, "p", 2, "poll interval")
 	flag.Parse()
 

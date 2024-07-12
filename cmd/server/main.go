@@ -7,6 +7,7 @@ import (
 	"github.com/moonicy/gometrics/internal/config"
 	"github.com/moonicy/gometrics/internal/file"
 	"github.com/moonicy/gometrics/internal/handlers"
+	database2 "github.com/moonicy/gometrics/pkg/database"
 	"github.com/moonicy/gometrics/pkg/logger"
 	"net/http"
 	"os"
@@ -27,10 +28,11 @@ func main() {
 		sugar.Error(err)
 	}
 	defer db.Close()
+	database := database2.NewDatabase(&sugar, db)
 
 	cr := file.NewConsumer(cfg.FileStoragePath)
 	pr := file.NewProducer(cfg.FileStoragePath)
-	storage := handlers.NewStorage(cfg, db, cr, pr)
+	storage := handlers.NewStorage(cfg, database, cr, pr)
 	err = storage.Init(ctx)
 	if err != nil {
 		sugar.Error(err)

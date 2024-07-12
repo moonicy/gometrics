@@ -28,7 +28,7 @@ func NewMetricsHandler(storage Storage, db *sql.DB, logger *zap.SugaredLogger) *
 	return &MetricsHandler{storage, db, logger}
 }
 
-func NewStorage(cfg config.ServerConfig, db *sql.DB, cr storage.Consumer, pr storage.Producer) Storage {
+func NewStorage(cfg config.ServerConfig, db storage.DB, cr storage.Consumer, pr storage.Producer) Storage {
 	if cfg.DatabaseDsn != "" {
 		return storage.NewDBStorage(db)
 	} else if cfg.FileStoragePath != "" {

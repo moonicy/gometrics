@@ -2,12 +2,15 @@ package client
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"github.com/moonicy/gometrics/internal/agent"
-	"github.com/moonicy/gometrics/internal/metrics"
+	m "github.com/moonicy/gometrics/internal/metrics"
 	"github.com/moonicy/gometrics/pkg/gzip"
+	"github.com/moonicy/gometrics/pkg/retry"
 	"log"
 	"net/http"
+	"net/url"
 )
 
 type Client struct {
@@ -22,73 +25,75 @@ func NewClient(host string) *Client {
 	}
 }
 
-func (cl *Client) sendGaugeMetrics(tp string, name string, value float64) string {
-	body := metrics.Metric{MetricName: metrics.MetricName{ID: name, MType: tp}, Value: &value}
-	out, err := json.Marshal(body)
+func (cl *Client) SendReport(report *agent.Report) {
+	metrics := make([]m.Metric, 0, len(report.Gauge)+len(report.Counter))
+	for k, v := range report.Counter {
+		metrics = append(metrics, m.Metric{
+			MetricName: m.MetricName{
+				ID:    k,
+				MType: m.Counter,
+			},
+			Delta: &v,
+			Value: nil,
+		})
+	}
+	for k, v := range report.Gauge {
+		metrics = append(metrics, m.Metric{
+			MetricName: m.MetricName{
+				ID:    k,
+				MType: m.Gauge,
+			},
+			Delta: nil,
+			Value: &v,
+		})
+	}
+	out, err := json.Marshal(metrics)
 	if err != nil {
 		log.Print(err)
-		return ""
+		return
 	}
 
 	buf, err := gzip.Compress(out)
 	if err != nil {
 		log.Print(err)
-		return ""
+		return
 	}
 
-	url := fmt.Sprintf("%s/update/", cl.host)
-	req, err := http.NewRequest("POST", url, buf)
+	uri := fmt.Sprintf("%s/updates/", cl.host)
+	req, err := http.NewRequest("POST", uri, buf)
 	if err != nil {
 		log.Print(err)
-		return ""
+		return
 	}
 	req.Header.Add("Content-Type", "application/json")
 	req.Header.Add("Content-Encoding", "gzip")
-	resp, err := cl.httpClient.Do(req)
-	if err != nil {
-		log.Print(err)
-		return ""
-	}
-	defer resp.Body.Close()
-	return resp.Status
-}
 
-func (cl *Client) sendCounterMetrics(tp string, name string, delta int64) string {
-	body := metrics.Metric{MetricName: metrics.MetricName{ID: name, MType: tp}, Delta: &delta}
-	out, err := json.Marshal(body)
+	var resp *http.Response
+	err = retry.RetryHandle(func() error {
+		resp, err = cl.httpClient.Do(req)
+		if err != nil {
+			var urlErr *url.Error
+			if errors.As(err, &urlErr) {
+				return retry.NewRetryableError(urlErr.Error())
+			}
+			return err
+		}
+		defer func() {
+			err = resp.Body.Close()
+			if err != nil {
+				log.Print(err)
+			}
+		}()
+		if resp.StatusCode >= http.StatusInternalServerError {
+			return retry.NewRetryableError("Server is not available")
+		}
+		return nil
+	})
 	if err != nil {
 		log.Print(err)
-		return ""
+		return
 	}
-
-	buf, err := gzip.Compress(out)
-	if err != nil {
-		log.Print(err)
-		return ""
-	}
-
-	url := fmt.Sprintf("%s/update/", cl.host)
-	req, err := http.NewRequest("POST", url, buf)
-	if err != nil {
-		log.Print(err)
-		return ""
-	}
-	req.Header.Add("Content-Type", "application/json")
-	req.Header.Add("Content-Encoding", "gzip")
-	resp, err := cl.httpClient.Do(req)
-	if err != nil {
-		log.Print(err)
-		return ""
-	}
-	defer resp.Body.Close()
-	return resp.Status
-}
-
-func (cl *Client) SendReport(mem *agent.Report) {
-	for k, v := range mem.Gauge {
-		go cl.sendGaugeMetrics(agent.Gauge, k, v)
-	}
-	for k, v := range mem.Counter {
-		go cl.sendCounterMetrics(agent.Counter, k, v)
+	if resp.StatusCode != http.StatusOK {
+		log.Print("Wrong status code", resp.Status)
 	}
 }
