@@ -6,20 +6,29 @@ import (
 	"errors"
 	"github.com/jackc/pgerrcode"
 	"github.com/jackc/pgx/v5/pgconn"
+	"github.com/moonicy/gometrics/internal/config"
 	"github.com/moonicy/gometrics/pkg/retry"
 	"go.uber.org/zap"
 )
 
-type Database struct {
+type RetryableDB struct {
 	db  *sql.DB
 	log *zap.SugaredLogger
 }
 
-func NewDatabase(logger *zap.SugaredLogger, db *sql.DB) *Database {
-	return &Database{db: db, log: logger}
+func NewDatabase(logger *zap.SugaredLogger, cfg config.ServerConfig) (*RetryableDB, func() error, error) {
+	db, err := sql.Open("pgx", cfg.DatabaseDsn)
+	if err != nil {
+		return nil, nil, err
+	}
+	return &RetryableDB{db: db, log: logger}, db.Close, nil
 }
 
-func (db *Database) ExecContext(ctx context.Context, query string, args ...any) (result sql.Result, err error) {
+func (db *RetryableDB) Ping() error {
+	return db.db.Ping()
+}
+
+func (db *RetryableDB) ExecContext(ctx context.Context, query string, args ...any) (result sql.Result, err error) {
 	db.log.Info("opening database")
 	err = retry.RetryHandle(func() error {
 		result, err = db.db.ExecContext(ctx, query, args...)
@@ -49,7 +58,7 @@ func (db *Database) ExecContext(ctx context.Context, query string, args ...any) 
 	return result, nil
 }
 
-func (db *Database) QueryContext(ctx context.Context, query string, args ...any) (rows *sql.Rows, err error) {
+func (db *RetryableDB) QueryContext(ctx context.Context, query string, args ...any) (rows *sql.Rows, err error) {
 	db.log.Info("opening database")
 	err = retry.RetryHandle(func() error {
 		rows, err = db.db.QueryContext(ctx, query, args...)
@@ -80,7 +89,7 @@ func (db *Database) QueryContext(ctx context.Context, query string, args ...any)
 	return rows, nil
 }
 
-func (db *Database) QueryRowContext(ctx context.Context, query string, args ...any) (row *sql.Row) {
+func (db *RetryableDB) QueryRowContext(ctx context.Context, query string, args ...any) (row *sql.Row) {
 	var err error
 	db.log.Info("opening database")
 	err = retry.RetryHandle(func() error {
@@ -107,6 +116,6 @@ func (db *Database) QueryRowContext(ctx context.Context, query string, args ...a
 	return row
 }
 
-func (db *Database) Begin() (tx *sql.Tx, err error) {
+func (db *RetryableDB) Begin() (tx *sql.Tx, err error) {
 	return db.db.Begin()
 }

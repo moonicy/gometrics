@@ -7,7 +7,6 @@ import (
 	"github.com/jackc/pgerrcode"
 	"github.com/jackc/pgx/v5/pgconn"
 	"strconv"
-	"strings"
 )
 
 type DB interface {
@@ -173,13 +172,14 @@ func (dbs *DBStorage) setCounters(ctx context.Context, tx *sql.Tx, counter map[s
 	sqlStr := "INSERT INTO counter(name, value) VALUES "
 	vals := make([]interface{}, 0, len(counter))
 
+	n := 0
 	for name, value := range counter {
-		sqlStr += "(?, ?),"
+		sqlStr += "($" + strconv.Itoa(n+1) + ", $" + strconv.Itoa(n+2) + "),"
+		n += 2
 		vals = append(vals, name, value)
 	}
 	// trim the last ,
 	sqlStr = sqlStr[0 : len(sqlStr)-1]
-	sqlStr = replaceSQL(sqlStr, "?")
 	sqlStr += "ON CONFLICT (name) DO UPDATE SET value = counter.value + EXCLUDED.value"
 
 	stmt, err := tx.Prepare(sqlStr)
@@ -199,13 +199,14 @@ func (dbs *DBStorage) setGauges(ctx context.Context, tx *sql.Tx, gauge map[strin
 	sqlStr := "INSERT INTO gauge(name, value) VALUES "
 	vals := make([]interface{}, 0, len(gauge))
 
+	n := 0
 	for name, value := range gauge {
-		sqlStr += "(?, ?),"
+		sqlStr += "($" + strconv.Itoa(n+1) + ", $" + strconv.Itoa(n+2) + "),"
+		n += 2
 		vals = append(vals, name, value)
 	}
 	// trim the last ,
 	sqlStr = sqlStr[0 : len(sqlStr)-1]
-	sqlStr = replaceSQL(sqlStr, "?")
 	sqlStr += "ON CONFLICT (name) DO UPDATE SET value = EXCLUDED.value"
 
 	stmt, err := tx.Prepare(sqlStr)
@@ -219,13 +220,4 @@ func (dbs *DBStorage) setGauges(ctx context.Context, tx *sql.Tx, gauge map[strin
 		return err
 	}
 	return nil
-}
-
-// Replacing ? with $n for postgres
-func replaceSQL(old, searchPattern string) string {
-	tmpCount := strings.Count(old, searchPattern)
-	for m := 1; m <= tmpCount; m++ {
-		old = strings.Replace(old, searchPattern, "$"+strconv.Itoa(m), 1)
-	}
-	return old
 }
