@@ -4,15 +4,23 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"github.com/jackc/pgerrcode"
+	"github.com/jackc/pgx/v5/pgconn"
 	"strconv"
-	"strings"
 )
 
-type DBStorage struct {
-	db *sql.DB
+type DB interface {
+	ExecContext(ctx context.Context, query string, args ...any) (result sql.Result, err error)
+	QueryContext(ctx context.Context, query string, args ...any) (rows *sql.Rows, err error)
+	QueryRowContext(ctx context.Context, query string, args ...any) (row *sql.Row)
+	Begin() (tx *sql.Tx, err error)
 }
 
-func NewDBStorage(db *sql.DB) *DBStorage {
+type DBStorage struct {
+	db DB
+}
+
+func NewDBStorage(db DB) *DBStorage {
 	return &DBStorage{db: db}
 }
 
@@ -32,6 +40,10 @@ func (dbs *DBStorage) SetGauge(ctx context.Context, key string, value float64) e
 	_, err := dbs.db.ExecContext(ctx, `INSERT INTO gauge (name, value) VALUES ($1, $2)
 						ON CONFLICT (name) DO UPDATE SET value = $2`, key, value)
 	if err != nil {
+		var pgErr *pgconn.PgError
+		if errors.As(err, &pgErr) && pgerrcode.IsIntegrityConstraintViolation(pgErr.Code) {
+			err = ErrConflict
+		}
 		return err
 	}
 	return nil
@@ -41,6 +53,10 @@ func (dbs *DBStorage) AddCounter(ctx context.Context, key string, value int64) e
 	_, err := dbs.db.ExecContext(ctx, `INSERT INTO counter (name, value) VALUES ($1, $2)
 						ON CONFLICT (name) DO UPDATE SET value = counter.value + EXCLUDED.value`, key, value)
 	if err != nil {
+		var pgErr *pgconn.PgError
+		if errors.As(err, &pgErr) && pgerrcode.IsIntegrityConstraintViolation(pgErr.Code) {
+			err = ErrConflict
+		}
 		return err
 	}
 	return nil
@@ -105,7 +121,7 @@ func (dbs *DBStorage) GetMetrics(ctx context.Context) (map[string]int64, map[str
 		return nil, nil, err
 	}
 
-	rowsCounter, err := dbs.db.Query(`SELECT name, value FROM counter ORDER BY name`)
+	rowsCounter, err := dbs.db.QueryContext(ctx, `SELECT name, value FROM counter ORDER BY name`)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -156,13 +172,14 @@ func (dbs *DBStorage) setCounters(ctx context.Context, tx *sql.Tx, counter map[s
 	sqlStr := "INSERT INTO counter(name, value) VALUES "
 	vals := make([]interface{}, 0, len(counter))
 
+	n := 0
 	for name, value := range counter {
-		sqlStr += "(?, ?),"
+		sqlStr += "($" + strconv.Itoa(n+1) + ", $" + strconv.Itoa(n+2) + "),"
+		n += 2
 		vals = append(vals, name, value)
 	}
 	// trim the last ,
 	sqlStr = sqlStr[0 : len(sqlStr)-1]
-	sqlStr = replaceSQL(sqlStr, "?")
 	sqlStr += "ON CONFLICT (name) DO UPDATE SET value = counter.value + EXCLUDED.value"
 
 	stmt, err := tx.Prepare(sqlStr)
@@ -182,13 +199,14 @@ func (dbs *DBStorage) setGauges(ctx context.Context, tx *sql.Tx, gauge map[strin
 	sqlStr := "INSERT INTO gauge(name, value) VALUES "
 	vals := make([]interface{}, 0, len(gauge))
 
+	n := 0
 	for name, value := range gauge {
-		sqlStr += "(?, ?),"
+		sqlStr += "($" + strconv.Itoa(n+1) + ", $" + strconv.Itoa(n+2) + "),"
+		n += 2
 		vals = append(vals, name, value)
 	}
 	// trim the last ,
 	sqlStr = sqlStr[0 : len(sqlStr)-1]
-	sqlStr = replaceSQL(sqlStr, "?")
 	sqlStr += "ON CONFLICT (name) DO UPDATE SET value = EXCLUDED.value"
 
 	stmt, err := tx.Prepare(sqlStr)
@@ -202,13 +220,4 @@ func (dbs *DBStorage) setGauges(ctx context.Context, tx *sql.Tx, gauge map[strin
 		return err
 	}
 	return nil
-}
-
-// Replacing ? with $n for postgres
-func replaceSQL(old, searchPattern string) string {
-	tmpCount := strings.Count(old, searchPattern)
-	for m := 1; m <= tmpCount; m++ {
-		old = strings.Replace(old, searchPattern, "$"+strconv.Itoa(m), 1)
-	}
-	return old
 }

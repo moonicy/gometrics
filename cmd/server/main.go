@@ -2,11 +2,12 @@ package main
 
 import (
 	"context"
-	"database/sql"
 	"errors"
+	_ "github.com/jackc/pgx/v5/stdlib"
 	"github.com/moonicy/gometrics/internal/config"
 	"github.com/moonicy/gometrics/internal/file"
 	"github.com/moonicy/gometrics/internal/handlers"
+	database2 "github.com/moonicy/gometrics/pkg/database"
 	"github.com/moonicy/gometrics/pkg/logger"
 	"net/http"
 	"os"
@@ -22,21 +23,21 @@ func main() {
 	sugar := logger.NewLogger()
 	ctx, cancel := context.WithCancel(context.Background())
 
-	db, err := sql.Open("pgx", cfg.DatabaseDsn)
+	database, closeFn, err := database2.NewDatabase(&sugar, cfg)
 	if err != nil {
 		sugar.Error(err)
 	}
-	defer db.Close()
+	defer closeFn()
 
 	cr := file.NewConsumer(cfg.FileStoragePath)
 	pr := file.NewProducer(cfg.FileStoragePath)
-	storage := handlers.NewStorage(cfg, db, cr, pr)
+	storage := handlers.NewStorage(cfg, database, cr, pr)
 	err = storage.Init(ctx)
 	if err != nil {
 		sugar.Error(err)
 	}
 
-	metricsHandler := handlers.NewMetricsHandler(storage, db, &sugar)
+	metricsHandler := handlers.NewMetricsHandler(storage, database, &sugar)
 
 	route := handlers.NewRoute(metricsHandler, sugar)
 
