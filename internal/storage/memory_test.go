@@ -1,6 +1,7 @@
 package storage
 
 import (
+	"context"
 	"fmt"
 	"github.com/moonicy/gometrics/internal/agent"
 	"testing"
@@ -52,7 +53,7 @@ func TestMemStorage_AddCounter(t *testing.T) {
 				gauge:   tt.fields.gauge,
 				counter: tt.fields.counter,
 			}
-			ms.AddCounter(tt.args.key, tt.args.value)
+			ms.AddCounter(context.Background(), tt.args.key, tt.args.value)
 
 			got := fmt.Sprintf("%d", ms.counter[tt.args.key])
 			if tt.wait != got {
@@ -108,7 +109,7 @@ func TestMemStorage_SetGauge(t *testing.T) {
 				gauge:   tt.fields.gauge,
 				counter: tt.fields.counter,
 			}
-			ms.SetGauge(tt.args.key, tt.args.value)
+			ms.SetGauge(context.Background(), tt.args.key, tt.args.value)
 
 			got := fmt.Sprintf("%f", ms.gauge[tt.args.key])
 			if tt.wait != got {

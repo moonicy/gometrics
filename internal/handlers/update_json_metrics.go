@@ -34,18 +34,36 @@ func (mh *MetricsHandler) UpdateJSONMetrics(res http.ResponseWriter, req *http.R
 	var delta *int64
 	switch mt.MType {
 	case metrics.Gauge:
-		mh.mem.SetGauge(mt.ID, *mt.Value)
-		gv, ok := mh.mem.GetGauge(mt.ID)
-		if ok {
-			value = &gv
+		err := mh.mem.SetGauge(req.Context(), mt.ID, *mt.Value)
+		if err != nil {
+			http.Error(res, err.Error(), http.StatusInternalServerError)
+			return
 		}
+		gv, err := mh.mem.GetGauge(req.Context(), mt.ID)
+		if err != nil {
+			if errors.Is(err, metrics.ErrNotFound) {
+				break
+			}
+			http.Error(res, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		value = &gv
 		fmt.Printf("%s\t%s\t%f\n", mt.ID, mt.MType, *mt.Value)
 	case metrics.Counter:
-		mh.mem.AddCounter(mt.ID, *mt.Delta)
-		cv, ok := mh.mem.GetCounter(mt.ID)
-		if ok {
-			delta = &cv
+		err := mh.mem.AddCounter(req.Context(), mt.ID, *mt.Delta)
+		if err != nil {
+			http.Error(res, err.Error(), http.StatusInternalServerError)
+			return
 		}
+		cv, err := mh.mem.GetCounter(req.Context(), mt.ID)
+		if err != nil {
+			if errors.Is(err, metrics.ErrNotFound) {
+				break
+			}
+			http.Error(res, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		delta = &cv
 		fmt.Printf("%s\t%s\t%d\n", mt.ID, mt.MType, *mt.Delta)
 	}
 

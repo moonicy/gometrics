@@ -24,14 +24,22 @@ func (mh *MetricsHandler) UpdateMetrics(res http.ResponseWriter, req *http.Reque
 			http.Error(res, "Value is not a valid float64", http.StatusBadRequest)
 			return
 		}
-		mh.mem.SetGauge(name, valFloat)
+		err = mh.mem.SetGauge(req.Context(), name, valFloat)
+		if err != nil {
+			http.Error(res, err.Error(), http.StatusInternalServerError)
+			return
+		}
 	case metrics.Counter:
 		valInt, err := strconv.ParseInt(val, 10, 64)
 		if err != nil {
 			http.Error(res, "Value is not a valid int64", http.StatusBadRequest)
 			return
 		}
-		mh.mem.AddCounter(name, valInt)
+		err = mh.mem.AddCounter(req.Context(), name, valInt)
+		if err != nil {
+			http.Error(res, err.Error(), http.StatusInternalServerError)
+			return
+		}
 	default:
 		http.Error(res, "Bad request", http.StatusBadRequest)
 	}

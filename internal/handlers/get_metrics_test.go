@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"context"
 	"github.com/go-chi/chi/v5"
 	"github.com/moonicy/gometrics/internal/agent"
 	"github.com/moonicy/gometrics/internal/storage"
@@ -11,14 +12,15 @@ import (
 )
 
 func TestMetricsHandler_GetMetrics(t *testing.T) {
+	ctx := context.Background()
 	const bodyWait = "Alloc: 22\nFrees: 22\n"
 	req, err := http.NewRequest("GET", "/", nil)
 	if err != nil {
 		t.Fatalf("could not create request: %v", err)
 	}
 	mem := storage.NewMemStorage()
-	mem.AddCounter(agent.Alloc, 22)
-	mem.SetGauge(agent.Frees, 22)
+	mem.AddCounter(ctx, agent.Alloc, 22)
+	mem.SetGauge(ctx, agent.Frees, 22)
 
 	u := &MetricsHandler{
 		mem: mem,

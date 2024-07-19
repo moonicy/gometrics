@@ -7,7 +7,6 @@ import (
 	"github.com/moonicy/gometrics/internal/config"
 	"github.com/moonicy/gometrics/internal/file"
 	"github.com/moonicy/gometrics/internal/handlers"
-	"github.com/moonicy/gometrics/internal/storage"
 	"github.com/moonicy/gometrics/pkg/logger"
 	"net/http"
 	"os"
@@ -29,15 +28,15 @@ func main() {
 	}
 	defer db.Close()
 
-	cm := file.NewConsumer(cfg.FileStoragePath)
+	cr := file.NewConsumer(cfg.FileStoragePath)
 	pr := file.NewProducer(cfg.FileStoragePath)
-	st := storage.NewFileStorage(cfg, cm, pr)
-	if cfg.Restore {
-		st.Restore()
+	storage := handlers.NewStorage(cfg, db, cr, pr)
+	err = storage.Init(ctx)
+	if err != nil {
+		sugar.Error(err)
 	}
-	st.RunSync()
-	st.WaitShutDown(ctx)
-	metricsHandler := handlers.NewMetricsHandler(st, db)
+
+	metricsHandler := handlers.NewMetricsHandler(storage, db)
 
 	route := handlers.NewRoute(metricsHandler, sugar)
 
