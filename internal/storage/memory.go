@@ -2,11 +2,8 @@ package storage
 
 import (
 	"context"
-	"errors"
 	"sync"
 )
-
-var ErrNotFound = errors.New("not found")
 
 type MemStorage struct {
 	gauge   map[string]float64
@@ -71,4 +68,16 @@ func (ms *MemStorage) GetMetrics(_ context.Context) (counter map[string]int64, g
 		counter[k] = v
 	}
 	return counter, gauge, nil
+}
+
+func (ms *MemStorage) SetMetrics(_ context.Context, counter map[string]int64, gauge map[string]float64) error {
+	ms.mx.Lock()
+	defer ms.mx.Unlock()
+	for k, v := range gauge {
+		ms.gauge[k] = v
+	}
+	for k, v := range counter {
+		ms.counter[k] += v
+	}
+	return nil
 }

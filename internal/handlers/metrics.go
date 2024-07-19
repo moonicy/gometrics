@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"github.com/moonicy/gometrics/internal/config"
 	"github.com/moonicy/gometrics/internal/storage"
+	"go.uber.org/zap"
 )
 
 type Storage interface {
@@ -14,15 +15,17 @@ type Storage interface {
 	GetCounter(ctx context.Context, key string) (value int64, err error)
 	GetGauge(ctx context.Context, key string) (value float64, err error)
 	GetMetrics(ctx context.Context) (counter map[string]int64, gauge map[string]float64, err error)
+	SetMetrics(ctx context.Context, counter map[string]int64, gauge map[string]float64) error
 }
 
 type MetricsHandler struct {
-	mem Storage
-	db  *sql.DB
+	storage Storage
+	db      *sql.DB
+	logger  *zap.SugaredLogger
 }
 
-func NewMetricsHandler(mem Storage, db *sql.DB) *MetricsHandler {
-	return &MetricsHandler{mem, db}
+func NewMetricsHandler(storage Storage, db *sql.DB, logger *zap.SugaredLogger) *MetricsHandler {
+	return &MetricsHandler{storage, db, logger}
 }
 
 func NewStorage(cfg config.ServerConfig, db *sql.DB, cr storage.Consumer, pr storage.Producer) Storage {

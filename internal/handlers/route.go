@@ -19,8 +19,11 @@ func NewRoute(mh *MetricsHandler, log zap.SugaredLogger) *chi.Mux {
 			r.Get("/{type}/{name}", mh.GetMetricsByName)
 		})
 		r.Route("/update", func(r chi.Router) {
-			r.Post("/", mh.UpdateJSONMetrics)
-			r.Post("/{type}/{name}/{value}", mh.UpdateMetrics)
+			r.Post("/", mh.UpdateJSONMetric)
+			r.Post("/{type}/{name}/{value}", mh.UpdateMetric)
+		})
+		r.Route("/updates", func(r chi.Router) {
+			r.Post("/", mh.UpdatesJSONMetrics)
 		})
 		r.Get("/ping", mh.GetPing)
 	})

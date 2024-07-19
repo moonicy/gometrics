@@ -46,7 +46,7 @@ func TestMetricsHandler_GetJSONMetricsByName(t *testing.T) {
 			}
 
 			u := &MetricsHandler{
-				mem: tt.mem,
+				storage: tt.mem,
 			}
 
 			rec := httptest.NewRecorder()

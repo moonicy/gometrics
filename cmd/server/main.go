@@ -36,7 +36,7 @@ func main() {
 		sugar.Error(err)
 	}
 
-	metricsHandler := handlers.NewMetricsHandler(storage, db)
+	metricsHandler := handlers.NewMetricsHandler(storage, db, &sugar)
 
 	route := handlers.NewRoute(metricsHandler, sugar)
 
