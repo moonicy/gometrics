@@ -39,7 +39,7 @@ func main() {
 
 	metricsHandler := handlers.NewMetricsHandler(storage, database, &sugar)
 
-	route := handlers.NewRoute(metricsHandler, sugar)
+	route := handlers.NewRoute(metricsHandler, sugar, cfg)
 
 	var wg sync.WaitGroup
 	wg.Add(1)

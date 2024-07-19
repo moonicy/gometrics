@@ -39,7 +39,7 @@ func TestUpdateMetrics_updateMetrics(t *testing.T) {
 
 			rec := httptest.NewRecorder()
 			r := chi.NewRouter()
-			r.Post("/update/{type}/{name}/{value}", u.UpdateMetric)
+			r.Post("/update/{type}/{name}/{value}", u.PostMetricUpdate)
 			r.ServeHTTP(rec, req)
 
 			resp := rec.Result()

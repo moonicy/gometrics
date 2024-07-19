@@ -51,7 +51,7 @@ func TestMetricsHandler_GetJSONMetricsByName(t *testing.T) {
 
 			rec := httptest.NewRecorder()
 			r := chi.NewRouter()
-			r.Post("/value/", u.PostJSONMetricsByName)
+			r.Post("/value/", u.GetMetricValueByNameJSON)
 			r.ServeHTTP(rec, req)
 
 			resp := rec.Result()

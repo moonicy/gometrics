@@ -46,7 +46,7 @@ func TestMetricsHandler_GetMetricsByName(t *testing.T) {
 
 			rec := httptest.NewRecorder()
 			r := chi.NewRouter()
-			r.Get("/value/{type}/{name}", u.GetMetricsByName)
+			r.Get("/value/{type}/{name}", u.GetMetricValueByName)
 			r.ServeHTTP(rec, req)
 
 			resp := rec.Result()

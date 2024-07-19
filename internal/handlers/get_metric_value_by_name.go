@@ -10,7 +10,7 @@ import (
 	"net/http"
 )
 
-func (mh *MetricsHandler) GetMetricsByName(res http.ResponseWriter, req *http.Request) {
+func (mh *MetricsHandler) GetMetricValueByName(res http.ResponseWriter, req *http.Request) {
 	name := chi.URLParam(req, metrics.MName)
 	tp := chi.URLParam(req, metrics.MType)
 	if mh.logger != nil {

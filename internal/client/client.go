@@ -7,6 +7,7 @@ import (
 	"github.com/moonicy/gometrics/internal/agent"
 	m "github.com/moonicy/gometrics/internal/metrics"
 	"github.com/moonicy/gometrics/pkg/gzip"
+	sign "github.com/moonicy/gometrics/pkg/hash"
 	"github.com/moonicy/gometrics/pkg/retry"
 	"log"
 	"net/http"
@@ -16,12 +17,14 @@ import (
 type Client struct {
 	httpClient *http.Client
 	host       string
+	hashKey    string
 }
 
-func NewClient(host string) *Client {
+func NewClient(host string, key string) *Client {
 	return &Client{
 		httpClient: &http.Client{},
 		host:       host,
+		hashKey:    key,
 	}
 }
 
@@ -67,6 +70,11 @@ func (cl *Client) SendReport(report *agent.Report) {
 	}
 	req.Header.Add("Content-Type", "application/json")
 	req.Header.Add("Content-Encoding", "gzip")
+
+	if cl.hashKey != "" {
+		hash := sign.CalcHash(out, cl.hashKey)
+		req.Header.Add("HashSHA256", hash)
+	}
 
 	var resp *http.Response
 	err = retry.RetryHandle(func() error {
