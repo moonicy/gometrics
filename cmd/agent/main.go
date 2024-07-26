@@ -4,6 +4,7 @@ import (
 	"github.com/moonicy/gometrics/internal/agent"
 	metricsClient "github.com/moonicy/gometrics/internal/client"
 	"github.com/moonicy/gometrics/internal/config"
+	"github.com/moonicy/gometrics/pkg/workerpool"
 	"sync"
 	"time"
 )
@@ -22,18 +23,32 @@ func main() {
 	var wg sync.WaitGroup
 	wg.Add(2)
 
+	cwp := workerpool.NewWorkerPool(5, cfg.RateLimit)
+	cwp.Run()
+
+	rwp := workerpool.NewWorkerPool(1, 1)
+	rwp.Run()
+
 	go func() {
 		for {
-			reader.Read(mem)
+			rwp.AddJob(func() error {
+				reader.Read(mem)
+				return nil
+			})
 			time.Sleep(pollInterval)
 		}
 	}()
 
 	go func() {
 		for {
-			client.SendReport(mem)
+			cwp.AddJob(func() error {
+				client.SendReport(mem)
+				return nil
+			})
 			time.Sleep(reportInterval)
 		}
 	}()
 	wg.Wait()
+	cwp.Close()
+	rwp.Close()
 }
