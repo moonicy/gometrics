@@ -24,10 +24,10 @@ func NewAgentConfig() AgentConfig {
 func (ac *AgentConfig) parseFlag() {
 	var err error
 	flag.StringVar(&ac.Host, "a", DefaultHost, "address and port to run server")
-	flag.IntVar(&ac.ReportInterval, "r", 20, "report interval")
-	flag.IntVar(&ac.PollInterval, "p", 2, "poll interval")
-	flag.StringVar(&ac.HashKey, "k", "", "hash key")
-	flag.IntVar(&ac.RateLimit, "l", 0, "rate limit")
+	flag.IntVar(&ac.ReportInterval, "r", DefaultReportInterval, "report interval")
+	flag.IntVar(&ac.PollInterval, "p", DefaultPollInterval, "poll interval")
+	flag.StringVar(&ac.HashKey, "k", DefaultHashKey, "hash key")
+	flag.IntVar(&ac.RateLimit, "l", DefaultRateLimit, "rate limit")
 	flag.Parse()
 
 	if envRunAddr := os.Getenv("ADDRESS"); envRunAddr != "" {

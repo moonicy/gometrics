@@ -1,6 +1,7 @@
 package workerpool
 
 import (
+	"log"
 	"sync/atomic"
 	"time"
 )
@@ -38,7 +39,8 @@ func (wp *WorkerPool) Run() {
 				}
 				err := job()
 				if err != nil {
-					panic(err)
+					log.Println("job err: ", err)
+					return
 				}
 				wp.busyCount.Add(-1)
 			}

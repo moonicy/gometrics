@@ -18,7 +18,11 @@ func NewMetricsReader() *MetricsReader {
 }
 
 func (mr *MetricsReader) Read(mem *Report) {
-	v, _ := gopsutil.VirtualMemory()
+	v, err := gopsutil.VirtualMemory()
+	if err != nil {
+		log.Println("Error getting memory info", err)
+		return
+	}
 	runtime.ReadMemStats(&mr.rtm)
 	mem.Gauge[Alloc] = float64(mr.rtm.Alloc)
 	mem.Gauge[BuckHashSys] = float64(mr.rtm.BuckHashSys)
