@@ -2,10 +2,10 @@ package main
 
 import (
 	"github.com/moonicy/gometrics/internal/agent"
+	"github.com/moonicy/gometrics/internal/agent/workerpool"
 	metricsClient "github.com/moonicy/gometrics/internal/client"
 	"github.com/moonicy/gometrics/internal/config"
 	"sync"
-	"time"
 )
 
 func main() {
@@ -13,27 +13,16 @@ func main() {
 
 	cfg.Host = config.ParseURI(cfg.Host)
 
-	var pollInterval = time.Duration(cfg.PollInterval) * time.Second
-	var reportInterval = time.Duration(cfg.ReportInterval) * time.Second
-
 	mem := agent.NewReport()
 	client := metricsClient.NewClient(cfg.Host, cfg.HashKey)
 	reader := agent.NewMetricsReader()
 	var wg sync.WaitGroup
 	wg.Add(2)
 
-	go func() {
-		for {
-			reader.Read(mem)
-			time.Sleep(pollInterval)
-		}
-	}()
+	closeReadFn := workerpool.RunReadMetrics(cfg, reader, mem, wg.Done)
+	closeSendFn := workerpool.RunSendReport(cfg, client, mem, wg.Done)
 
-	go func() {
-		for {
-			client.SendReport(mem)
-			time.Sleep(reportInterval)
-		}
-	}()
 	wg.Wait()
+	closeSendFn()
+	closeReadFn()
 }

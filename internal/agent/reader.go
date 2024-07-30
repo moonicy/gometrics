@@ -1,8 +1,12 @@
 package agent
 
 import (
+	"github.com/shirou/gopsutil/v4/cpu"
+	gopsutil "github.com/shirou/gopsutil/v4/mem"
+	"log"
 	"math/rand"
 	"runtime"
+	"strconv"
 )
 
 type MetricsReader struct {
@@ -14,6 +18,11 @@ func NewMetricsReader() *MetricsReader {
 }
 
 func (mr *MetricsReader) Read(mem *Report) {
+	v, err := gopsutil.VirtualMemory()
+	if err != nil {
+		log.Println("Error getting memory info", err)
+		return
+	}
 	runtime.ReadMemStats(&mr.rtm)
 	mem.Gauge[Alloc] = float64(mr.rtm.Alloc)
 	mem.Gauge[BuckHashSys] = float64(mr.rtm.BuckHashSys)
@@ -46,4 +55,15 @@ func (mr *MetricsReader) Read(mem *Report) {
 	mem.Gauge[RandomValue] = rand.Float64()
 
 	mem.Counter[PollCount]++
+
+	mem.Gauge[TotalMemory] = float64(v.Total)
+	mem.Gauge[FreeMemory] = float64(v.Free)
+	cpuAll, err := cpu.Percent(0, true)
+	if err != nil {
+		log.Println("Error getting CPU stats: ", err)
+		return
+	}
+	for i, cpuVal := range cpuAll {
+		mem.Gauge[CPUutilization+strconv.Itoa(i+1)] = cpuVal
+	}
 }
