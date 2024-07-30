@@ -11,6 +11,7 @@ type AgentConfig struct {
 	Host           string
 	ReportInterval int
 	PollInterval   int
+	HashKey        string
 }
 
 func NewAgentConfig() AgentConfig {
@@ -24,10 +25,14 @@ func (ac *AgentConfig) parseFlag() {
 	flag.StringVar(&ac.Host, "a", DefaultHost, "address and port to run server")
 	flag.IntVar(&ac.ReportInterval, "r", 20, "report interval")
 	flag.IntVar(&ac.PollInterval, "p", 2, "poll interval")
+	flag.StringVar(&ac.HashKey, "k", "", "hash key")
 	flag.Parse()
 
 	if envRunAddr := os.Getenv("ADDRESS"); envRunAddr != "" {
 		ac.Host = envRunAddr
+	}
+	if envHashKey := os.Getenv("KEY"); envHashKey != "" {
+		ac.HashKey = envHashKey
 	}
 	if envReportInterval := os.Getenv("REPORT_INTERVAL"); envReportInterval != "" {
 		ac.ReportInterval, err = strconv.Atoi(envReportInterval)

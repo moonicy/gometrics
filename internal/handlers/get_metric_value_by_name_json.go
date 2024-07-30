@@ -10,7 +10,7 @@ import (
 	"net/http"
 )
 
-func (mh *MetricsHandler) PostJSONMetricsByName(res http.ResponseWriter, req *http.Request) {
+func (mh *MetricsHandler) GetMetricValueByNameJSON(res http.ResponseWriter, req *http.Request) {
 	var mt metrics.MetricName
 
 	res.Header().Set("Content-Type", "application/json")

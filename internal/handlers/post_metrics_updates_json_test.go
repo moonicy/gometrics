@@ -55,7 +55,7 @@ func TestMetricsHandler_UpdatesJSONMetrics(t *testing.T) {
 
 			rec := httptest.NewRecorder()
 			r := chi.NewRouter()
-			r.Post("/updates/", u.UpdatesJSONMetrics)
+			r.Post("/updates/", u.PostMetricsUpdatesJSON)
 			r.ServeHTTP(rec, req)
 
 			resp := rec.Result()

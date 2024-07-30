@@ -17,7 +17,7 @@ func main() {
 	var reportInterval = time.Duration(cfg.ReportInterval) * time.Second
 
 	mem := agent.NewReport()
-	client := metricsClient.NewClient(cfg.Host)
+	client := metricsClient.NewClient(cfg.Host, cfg.HashKey)
 	reader := agent.NewMetricsReader()
 	var wg sync.WaitGroup
 	wg.Add(2)

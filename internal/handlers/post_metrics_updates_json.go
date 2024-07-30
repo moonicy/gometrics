@@ -8,7 +8,7 @@ import (
 	"net/http"
 )
 
-func (mh *MetricsHandler) UpdatesJSONMetrics(res http.ResponseWriter, req *http.Request) {
+func (mh *MetricsHandler) PostMetricsUpdatesJSON(res http.ResponseWriter, req *http.Request) {
 	var mt []metrics.Metric
 
 	res.Header().Set("Content-Type", "application/json")

@@ -8,7 +8,7 @@ import (
 	"strconv"
 )
 
-func (mh *MetricsHandler) UpdateMetric(res http.ResponseWriter, req *http.Request) {
+func (mh *MetricsHandler) PostMetricUpdate(res http.ResponseWriter, req *http.Request) {
 	name := chi.URLParam(req, metrics.MName)
 	val := chi.URLParam(req, metrics.MValue)
 	tp := chi.URLParam(req, metrics.MType)

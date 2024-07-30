@@ -12,6 +12,7 @@ type ServerConfig struct {
 	FileStoragePath string
 	Restore         bool
 	DatabaseDsn     string
+	HashKey         string
 }
 
 func NewServerConfig() ServerConfig {
@@ -26,6 +27,7 @@ func (sc *ServerConfig) parseFlag() {
 	flag.StringVar(&sc.FileStoragePath, "f", "", "file storage path")
 	flag.BoolVar(&sc.Restore, "r", true, "restore")
 	flag.StringVar(&sc.DatabaseDsn, "d", "", "database dsn")
+	flag.StringVar(&sc.HashKey, "k", "", "hash key")
 	flag.Parse()
 
 	if envRunAddr := os.Getenv("ADDRESS"); envRunAddr != "" {
@@ -39,6 +41,9 @@ func (sc *ServerConfig) parseFlag() {
 	}
 	if envDatabaseDsn := os.Getenv("DATABASE_DSN"); envDatabaseDsn != "" {
 		sc.DatabaseDsn = envDatabaseDsn
+	}
+	if envHashKey := os.Getenv("KEY"); envHashKey != "" {
+		sc.HashKey = envHashKey
 	}
 	if envRestore := os.Getenv("RESTORE"); envRestore != "" {
 		switch envRestore {
