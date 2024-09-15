@@ -24,46 +24,45 @@ func (mr *MetricsReader) Read(mem *Report) {
 		return
 	}
 	runtime.ReadMemStats(&mr.rtm)
-	mem.Gauge[Alloc] = float64(mr.rtm.Alloc)
-	mem.Gauge[BuckHashSys] = float64(mr.rtm.BuckHashSys)
-	mem.Gauge[Frees] = float64(mr.rtm.Frees)
-	mem.Gauge[GCCPUFraction] = mr.rtm.GCCPUFraction
-	mem.Gauge[GCSys] = float64(mr.rtm.GCSys)
-	mem.Gauge[HeapAlloc] = float64(mr.rtm.HeapAlloc)
-	mem.Gauge[HeapIdle] = float64(mr.rtm.HeapIdle)
-	mem.Gauge[HeapInuse] = float64(mr.rtm.HeapInuse)
-	mem.Gauge[HeapObjects] = float64(mr.rtm.HeapObjects)
-	mem.Gauge[HeapReleased] = float64(mr.rtm.HeapReleased)
-	mem.Gauge[HeapSys] = float64(mr.rtm.HeapSys)
-	mem.Gauge[LastGC] = float64(mr.rtm.LastGC)
-	mem.Gauge[Lookups] = float64(mr.rtm.Lookups)
-	mem.Gauge[MCacheInuse] = float64(mr.rtm.MCacheInuse)
-	mem.Gauge[MCacheSys] = float64(mr.rtm.MCacheSys)
-	mem.Gauge[MSpanInuse] = float64(mr.rtm.MSpanInuse)
-	mem.Gauge[MSpanSys] = float64(mr.rtm.MSpanSys)
-	mem.Gauge[Mallocs] = float64(mr.rtm.Mallocs)
-	mem.Gauge[NextGC] = float64(mr.rtm.NextGC)
-	mem.Gauge[NumForcedGC] = float64(mr.rtm.NumForcedGC)
-	mem.Gauge[NumGC] = float64(mr.rtm.NumGC)
-	mem.Gauge[OtherSys] = float64(mr.rtm.OtherSys)
-	mem.Gauge[PauseTotalNs] = float64(mr.rtm.PauseTotalNs)
-	mem.Gauge[StackInuse] = float64(mr.rtm.StackInuse)
-	mem.Gauge[StackSys] = float64(mr.rtm.StackSys)
-	mem.Gauge[Sys] = float64(mr.rtm.Sys)
-	mem.Gauge[TotalAlloc] = float64(mr.rtm.TotalAlloc)
+	mem.SetGauge(Alloc, float64(mr.rtm.Alloc))
+	mem.SetGauge(BuckHashSys, float64(mr.rtm.BuckHashSys))
+	mem.SetGauge(Frees, float64(mr.rtm.Frees))
+	mem.SetGauge(GCCPUFraction, mr.rtm.GCCPUFraction)
+	mem.SetGauge(GCSys, float64(mr.rtm.GCSys))
+	mem.SetGauge(HeapAlloc, float64(mr.rtm.HeapAlloc))
+	mem.SetGauge(HeapIdle, float64(mr.rtm.HeapIdle))
+	mem.SetGauge(HeapInuse, float64(mr.rtm.HeapInuse))
+	mem.SetGauge(HeapObjects, float64(mr.rtm.HeapObjects))
+	mem.SetGauge(HeapReleased, float64(mr.rtm.HeapReleased))
+	mem.SetGauge(HeapSys, float64(mr.rtm.HeapSys))
+	mem.SetGauge(LastGC, float64(mr.rtm.LastGC))
+	mem.SetGauge(Lookups, float64(mr.rtm.Lookups))
+	mem.SetGauge(MCacheInuse, float64(mr.rtm.MCacheInuse))
+	mem.SetGauge(MCacheSys, float64(mr.rtm.MCacheSys))
+	mem.SetGauge(MSpanInuse, float64(mr.rtm.MSpanInuse))
+	mem.SetGauge(MSpanSys, float64(mr.rtm.MSpanSys))
+	mem.SetGauge(Mallocs, float64(mr.rtm.Mallocs))
+	mem.SetGauge(NextGC, float64(mr.rtm.NextGC))
+	mem.SetGauge(NumForcedGC, float64(mr.rtm.NumForcedGC))
+	mem.SetGauge(NumGC, float64(mr.rtm.NumGC))
+	mem.SetGauge(OtherSys, float64(mr.rtm.OtherSys))
+	mem.SetGauge(PauseTotalNs, float64(mr.rtm.PauseTotalNs))
+	mem.SetGauge(StackInuse, float64(mr.rtm.StackInuse))
+	mem.SetGauge(StackSys, float64(mr.rtm.StackSys))
+	mem.SetGauge(Sys, float64(mr.rtm.Sys))
+	mem.SetGauge(TotalAlloc, float64(mr.rtm.TotalAlloc))
+	mem.SetGauge(RandomValue, rand.Float64())
 
-	mem.Gauge[RandomValue] = rand.Float64()
+	mem.AddCounter(PollCount, 1)
 
-	mem.Counter[PollCount]++
-
-	mem.Gauge[TotalMemory] = float64(v.Total)
-	mem.Gauge[FreeMemory] = float64(v.Free)
+	mem.SetGauge(TotalMemory, float64(v.Total))
+	mem.SetGauge(FreeMemory, float64(v.Free))
 	cpuAll, err := cpu.Percent(0, true)
 	if err != nil {
 		log.Println("Error getting CPU stats: ", err)
 		return
 	}
 	for i, cpuVal := range cpuAll {
-		mem.Gauge[CPUutilization+strconv.Itoa(i+1)] = cpuVal
+		mem.SetGauge(CPUutilization+strconv.Itoa(i+1), cpuVal)
 	}
 }

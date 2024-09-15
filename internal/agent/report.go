@@ -1,5 +1,10 @@
 package agent
 
+import (
+	"sync"
+	"sync/atomic"
+)
+
 const (
 	Alloc          = "Alloc"
 	BuckHashSys    = "BuckHashSys"
@@ -38,13 +43,34 @@ const (
 )
 
 type Report struct {
-	Gauge   map[string]float64
-	Counter map[string]int64
+	Gauge        sync.Map
+	Counter      sync.Map
+	gaugeCount   int
+	counterCount int
 }
 
 func NewReport() *Report {
 	return &Report{
-		Gauge:   make(map[string]float64),
-		Counter: make(map[string]int64),
+		Gauge:   sync.Map{},
+		Counter: sync.Map{},
+	}
+}
+
+func (r *Report) GetCommonCount() int {
+	return r.gaugeCount + r.counterCount
+}
+
+func (r *Report) SetGauge(name string, value float64) {
+	r.Gauge.Store(name, value)
+	r.gaugeCount++
+}
+
+func (r *Report) AddCounter(name string, value int64) {
+	if v, ok := r.Counter.Load(name); ok {
+		ptr := v.(*int64)
+		atomic.AddInt64(ptr, value)
+	} else {
+		r.Counter.Store(name, value)
+		r.counterCount++
 	}
 }
