@@ -3,11 +3,12 @@ package storage
 import (
 	"context"
 	"fmt"
-	"github.com/moonicy/gometrics/internal/config"
-	"github.com/moonicy/gometrics/internal/file"
 	"log"
 	"sync"
 	"time"
+
+	"github.com/moonicy/gometrics/internal/config"
+	"github.com/moonicy/gometrics/internal/file"
 )
 
 type Consumer interface {

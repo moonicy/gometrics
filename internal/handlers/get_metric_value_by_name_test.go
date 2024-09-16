@@ -3,12 +3,14 @@ package handlers
 import (
 	"context"
 	"fmt"
-	"github.com/go-chi/chi/v5"
-	"github.com/moonicy/gometrics/internal/agent"
-	"github.com/moonicy/gometrics/internal/storage"
 	"net/http"
 	"net/http/httptest"
 	"testing"
+
+	"github.com/go-chi/chi/v5"
+
+	"github.com/moonicy/gometrics/internal/agent"
+	"github.com/moonicy/gometrics/internal/storage"
 )
 
 func TestMetricsHandler_GetMetricsByName(t *testing.T) {

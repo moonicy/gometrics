@@ -2,10 +2,12 @@ package handlers
 
 import (
 	"fmt"
-	"github.com/go-chi/chi/v5"
-	"github.com/moonicy/gometrics/internal/metrics"
 	"net/http"
 	"strconv"
+
+	"github.com/go-chi/chi/v5"
+
+	"github.com/moonicy/gometrics/internal/metrics"
 )
 
 func (mh *MetricsHandler) PostMetricUpdate(res http.ResponseWriter, req *http.Request) {

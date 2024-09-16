@@ -3,9 +3,10 @@ package handlers
 import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
+	"go.uber.org/zap"
+
 	"github.com/moonicy/gometrics/internal/config"
 	"github.com/moonicy/gometrics/pkg/middlewares"
-	"go.uber.org/zap"
 )
 
 func NewRoute(mh *MetricsHandler, log zap.SugaredLogger, cfg config.ServerConfig) *chi.Mux {

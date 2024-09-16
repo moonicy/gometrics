@@ -4,11 +4,13 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+
 	"github.com/jackc/pgerrcode"
 	"github.com/jackc/pgx/v5/pgconn"
+	"go.uber.org/zap"
+
 	"github.com/moonicy/gometrics/internal/config"
 	"github.com/moonicy/gometrics/pkg/retry"
-	"go.uber.org/zap"
 )
 
 type RetryableDB struct {

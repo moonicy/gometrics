@@ -1,12 +1,13 @@
 package agent
 
 import (
-	"github.com/shirou/gopsutil/v4/cpu"
-	gopsutil "github.com/shirou/gopsutil/v4/mem"
 	"log"
 	"math/rand"
 	"runtime"
 	"strconv"
+
+	"github.com/shirou/gopsutil/v4/cpu"
+	gopsutil "github.com/shirou/gopsutil/v4/mem"
 )
 
 type MetricsReader struct {

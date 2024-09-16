@@ -1,11 +1,12 @@
 package workerpool
 
 import (
+	"time"
+
 	"github.com/moonicy/gometrics/internal/agent"
 	"github.com/moonicy/gometrics/internal/client"
 	"github.com/moonicy/gometrics/internal/config"
 	"github.com/moonicy/gometrics/pkg/workerpool"
-	"time"
 )
 
 func RunSendReport(cfg config.AgentConfig, client *client.Client, mem *agent.Report, callback func()) func() {

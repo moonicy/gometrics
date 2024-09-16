@@ -1,11 +1,12 @@
 package client
 
 import (
-	"github.com/moonicy/gometrics/internal/agent"
 	"io"
 	"net/http"
 	"net/http/httptest"
 	"testing"
+
+	"github.com/moonicy/gometrics/internal/agent"
 )
 
 func TestClient_SendReport(t *testing.T) {

@@ -3,14 +3,16 @@ package handlers
 import (
 	"bytes"
 	"encoding/json"
-	"github.com/go-chi/chi/v5"
-	"github.com/moonicy/gometrics/internal/agent"
-	"github.com/moonicy/gometrics/internal/metrics"
-	"github.com/moonicy/gometrics/internal/storage"
 	"log"
 	"net/http"
 	"net/http/httptest"
 	"testing"
+
+	"github.com/go-chi/chi/v5"
+
+	"github.com/moonicy/gometrics/internal/agent"
+	"github.com/moonicy/gometrics/internal/metrics"
+	"github.com/moonicy/gometrics/internal/storage"
 )
 
 func TestMetricsHandler_UpdatesJSONMetrics(t *testing.T) {

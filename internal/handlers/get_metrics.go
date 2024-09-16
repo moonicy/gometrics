@@ -2,9 +2,10 @@ package handlers
 
 import (
 	"fmt"
-	"github.com/moonicy/gometrics/pkg/floattostr"
 	"net/http"
 	"strings"
+
+	"github.com/moonicy/gometrics/pkg/floattostr"
 )
 
 func (mh *MetricsHandler) GetMetrics(res http.ResponseWriter, req *http.Request) {

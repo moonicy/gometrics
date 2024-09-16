@@ -4,11 +4,12 @@ import (
 	"bytes"
 	"crypto/sha256"
 	"encoding/hex"
-	sign "github.com/moonicy/gometrics/pkg/hash"
 	"hash"
 	"io"
 	"net/http"
 	"strings"
+
+	sign "github.com/moonicy/gometrics/pkg/hash"
 )
 
 type signResponseWriter struct {

@@ -3,15 +3,17 @@ package client
 import (
 	"errors"
 	"fmt"
+	"log"
+	"net/http"
+	"net/url"
+
 	jsoniter "github.com/json-iterator/go"
+
 	"github.com/moonicy/gometrics/internal/agent"
 	m "github.com/moonicy/gometrics/internal/metrics"
 	"github.com/moonicy/gometrics/pkg/gzip"
 	sign "github.com/moonicy/gometrics/pkg/hash"
 	"github.com/moonicy/gometrics/pkg/retry"
-	"log"
-	"net/http"
-	"net/url"
 )
 
 type Client struct {
