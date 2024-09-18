@@ -16,12 +16,14 @@ import (
 	"github.com/moonicy/gometrics/pkg/retry"
 )
 
+// Client представляет клиента для отправки метрик на сервер.
 type Client struct {
 	httpClient *http.Client
 	host       string
 	hashKey    string
 }
 
+// NewClient создаёт и возвращает новый экземпляр Client с заданным хостом и ключом хеширования.
 func NewClient(host string, key string) *Client {
 	return &Client{
 		httpClient: &http.Client{},
@@ -30,6 +32,9 @@ func NewClient(host string, key string) *Client {
 	}
 }
 
+// SendReport отправляет отчет с метриками на сервер.
+// Он собирает данные метрик, сжимает их, добавляет необходимые заголовки и отправляет HTTP-запрос.
+// В случае ошибок выполняет повторные попытки с помощью механизма retry.
 func (cl *Client) SendReport(report *agent.Report) {
 	out, err := cl.makeRequestData(report)
 	if err != nil {

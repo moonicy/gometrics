@@ -6,6 +6,7 @@ import (
 	"io"
 )
 
+// Compress сжимает переданный срез байт src и возвращает io.Reader с сжатыми данными или ошибку.
 func Compress(src []byte) (io.Reader, error) {
 	buf := bytes.NewBuffer(nil)
 	zb := gzip.NewWriter(buf)

@@ -1,3 +1,4 @@
+// Package database предоставляет обертку над sql.DB с возможностью повторных попыток при ошибках соединения.
 package database
 
 import (
@@ -13,11 +14,13 @@ import (
 	"github.com/moonicy/gometrics/pkg/retry"
 )
 
+// RetryableDB представляет базу данных с возможностью повторных попыток при ошибках соединения.
 type RetryableDB struct {
 	db  *sql.DB
 	log *zap.SugaredLogger
 }
 
+// NewDatabase создает новое соединение с базой данных и возвращает RetryableDB, функцию для закрытия соединения и ошибку, если она произошла.
 func NewDatabase(logger *zap.SugaredLogger, cfg config.ServerConfig) (*RetryableDB, func() error, error) {
 	db, err := sql.Open("pgx", cfg.DatabaseDsn)
 	if err != nil {
@@ -26,10 +29,12 @@ func NewDatabase(logger *zap.SugaredLogger, cfg config.ServerConfig) (*Retryable
 	return &RetryableDB{db: db, log: logger}, db.Close, nil
 }
 
+// Ping проверяет соединение с базой данных.
 func (db *RetryableDB) Ping() error {
 	return db.db.Ping()
 }
 
+// ExecContext выполняет SQL-запрос без возвращения строк и поддерживает повторные попытки при ошибках соединения.
 func (db *RetryableDB) ExecContext(ctx context.Context, query string, args ...any) (result sql.Result, err error) {
 	db.log.Info("opening database")
 	err = retry.RetryHandle(func() error {
@@ -60,6 +65,7 @@ func (db *RetryableDB) ExecContext(ctx context.Context, query string, args ...an
 	return result, nil
 }
 
+// QueryContext выполняет SQL-запрос и возвращает несколько строк результата, поддерживая повторные попытки при ошибках соединения.
 func (db *RetryableDB) QueryContext(ctx context.Context, query string, args ...any) (rows *sql.Rows, err error) {
 	db.log.Info("opening database")
 	err = retry.RetryHandle(func() error {
@@ -91,6 +97,7 @@ func (db *RetryableDB) QueryContext(ctx context.Context, query string, args ...a
 	return rows, nil
 }
 
+// QueryRowContext выполняет SQL-запрос и возвращает одну строку результата, поддерживая повторные попытки при ошибках соединения.
 func (db *RetryableDB) QueryRowContext(ctx context.Context, query string, args ...any) (row *sql.Row) {
 	var err error
 	db.log.Info("opening database")
@@ -118,6 +125,7 @@ func (db *RetryableDB) QueryRowContext(ctx context.Context, query string, args .
 	return row
 }
 
+// Begin начинает новую транзакцию и возвращает объект sql.Tx.
 func (db *RetryableDB) Begin() (tx *sql.Tx, err error) {
 	return db.db.Begin()
 }

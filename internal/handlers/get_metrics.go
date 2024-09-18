@@ -8,6 +8,8 @@ import (
 	"github.com/moonicy/gometrics/pkg/floattostr"
 )
 
+// GetMetrics обрабатывает HTTP-запрос для получения значения всех метрик.
+// В случае ошибки возвращает соответствующий HTTP-статус и сообщение об ошибке.
 func (mh *MetricsHandler) GetMetrics(res http.ResponseWriter, req *http.Request) {
 	res.Header().Set("Content-Type", "text/html")
 	gotCounter, gotGauge, err := mh.storage.GetMetrics(req.Context())

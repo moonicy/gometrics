@@ -2,9 +2,11 @@ package handlers
 
 import (
 	"context"
+	"fmt"
 	"io"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 
 	"github.com/go-chi/chi/v5"
@@ -46,5 +48,34 @@ func TestMetricsHandler_GetMetrics(t *testing.T) {
 	if bodyString != bodyWait {
 		t.Errorf("expected: %s\ngot: \n%s", bodyWait, bodyString)
 	}
+}
 
+func ExampleMetricsHandler_GetMetrics() {
+	// Инициализируем хранилище и добавляем метрики.
+	memStorage := storage.NewMemStorage()
+	_ = memStorage.SetGauge(context.Background(), "Alloc", 12345.67)
+	_ = memStorage.AddCounter(context.Background(), "PollCount", 42)
+
+	// Создаём новый MetricsHandler.
+	mh := NewMetricsHandler(memStorage, nil, nil)
+
+	// Создаём новый HTTP-запрос.
+	req := httptest.NewRequest("GET", "/", nil)
+
+	// Создаём Recorder для записи HTTP-ответа.
+	rr := httptest.NewRecorder()
+
+	// Вызываем обработчик.
+	mh.GetMetrics(rr, req)
+
+	// Выводим статусный код и тело ответа.
+	fmt.Println("Status Code:", rr.Code)
+	fmt.Println("Body:")
+	fmt.Println(strings.TrimSpace(rr.Body.String()))
+
+	// Output:
+	// Status Code: 200
+	// Body:
+	// PollCount: 42
+	// Alloc: 12345.67
 }

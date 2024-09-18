@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
@@ -51,4 +52,44 @@ func TestUpdateMetrics_updateMetrics(t *testing.T) {
 			}
 		})
 	}
+}
+
+func ExampleMetricsHandler_PostMetricUpdate() {
+	// Инициализируем хранилище.
+	memStorage := storage.NewMemStorage()
+
+	// Создаём новый MetricsHandler.
+	mh := NewMetricsHandler(memStorage, nil, nil)
+
+	// Создаём HTTP-запрос для обновления метрики типа gauge.
+	req := httptest.NewRequest("POST", "/update/gauge/Alloc/12345.67", nil)
+
+	// Устанавливаем параметры URL в контексте chi.
+	rctx := chi.NewRouteContext()
+	rctx.URLParams.Add("type", "gauge")
+	rctx.URLParams.Add("name", "Alloc")
+	rctx.URLParams.Add("value", "12345.67")
+	req = req.WithContext(context.WithValue(req.Context(), chi.RouteCtxKey, rctx))
+
+	// Создаём Recorder для записи ответа.
+	rr := httptest.NewRecorder()
+
+	// Вызываем обработчик.
+	mh.PostMetricUpdate(rr, req)
+
+	// Выводим статусный код.
+	fmt.Println("Status Code:", rr.Code)
+
+	// Проверяем, что метрика была обновлена.
+	value, err := memStorage.GetGauge(context.Background(), "Alloc")
+	if err != nil {
+		fmt.Println("Error:", err)
+	} else {
+		fmt.Printf("Updated Gauge Alloc: %.2f\n", value)
+	}
+
+	// Output:
+	// Alloc	12345.67	gauge
+	// Status Code: 200
+	// Updated Gauge Alloc: 12345.67
 }

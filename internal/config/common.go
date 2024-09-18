@@ -2,6 +2,7 @@ package config
 
 import "strings"
 
+// Конфигурация сервера по умолчанию.
 const (
 	DefaultHost           = "localhost:8080"
 	DefaultReportInterval = 20
@@ -10,6 +11,7 @@ const (
 	DefaultRateLimit      = 0
 )
 
+// ParseURI возвращает полный URI, добавляя протокол и хост по умолчанию при необходимости.
 func ParseURI(uri string) string {
 	str := strings.Split(uri, ":")
 	if len(str) == 1 {

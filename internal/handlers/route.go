@@ -9,6 +9,8 @@ import (
 	"github.com/moonicy/gometrics/pkg/middlewares"
 )
 
+// NewRoute создаёт и настраивает новый маршрутизатор chi.Mux с необходимыми маршрутами и middleware.
+// Он принимает MetricsHandler для обработки HTTP-запросов метрик, логгер и конфигурацию сервера.
 func NewRoute(mh *MetricsHandler, log zap.SugaredLogger, cfg config.ServerConfig) *chi.Mux {
 	router := chi.NewRouter()
 	router.Route("/", func(r chi.Router) {

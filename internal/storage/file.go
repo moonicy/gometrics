@@ -11,18 +11,21 @@ import (
 	"github.com/moonicy/gometrics/internal/file"
 )
 
+// Consumer определяет интерфейс для чтения событий из файла.
 type Consumer interface {
 	Open() error
 	ReadEvent() (*file.Event, error)
 	Close() error
 }
 
+// Producer определяет интерфейс для записи событий в файл.
 type Producer interface {
 	Open() error
 	WriteEvent(event *file.Event) error
 	Close() error
 }
 
+// FileStorage представляет хранилище метрик с использованием файловой системы.
 type FileStorage struct {
 	mem      *MemStorage
 	consumer Consumer
@@ -31,6 +34,7 @@ type FileStorage struct {
 	mx       sync.Mutex
 }
 
+// NewFileStorage создаёт и возвращает новое файловое хранилище метрик.
 func NewFileStorage(cfg config.ServerConfig, consumer Consumer, producer Producer) *FileStorage {
 	mem := NewMemStorage()
 	fs := &FileStorage{
@@ -42,6 +46,7 @@ func NewFileStorage(cfg config.ServerConfig, consumer Consumer, producer Produce
 	return fs
 }
 
+// Init инициализирует файловое хранилище, выполняя восстановление и настройку синхронизации.
 func (fs *FileStorage) Init(ctx context.Context) error {
 	if fs.cfg.Restore {
 		fs.Restore()
@@ -52,6 +57,7 @@ func (fs *FileStorage) Init(ctx context.Context) error {
 	return nil
 }
 
+// SetGauge устанавливает значение метрики типа gauge и сохраняет изменения в файл при необходимости.
 func (fs *FileStorage) SetGauge(ctx context.Context, key string, value float64) error {
 	err := fs.mem.SetGauge(ctx, key, value)
 	if err != nil {
@@ -66,6 +72,7 @@ func (fs *FileStorage) SetGauge(ctx context.Context, key string, value float64) 
 	return nil
 }
 
+// AddCounter увеличивает значение метрики типа counter и сохраняет изменения в файл при необходимости.
 func (fs *FileStorage) AddCounter(ctx context.Context, key string, value int64) error {
 	err := fs.mem.AddCounter(ctx, key, value)
 	if err != nil {
@@ -80,18 +87,22 @@ func (fs *FileStorage) AddCounter(ctx context.Context, key string, value int64) 
 	return nil
 }
 
+// GetCounter возвращает текущее значение метрики типа counter.
 func (fs *FileStorage) GetCounter(ctx context.Context, key string) (int64, error) {
 	return fs.mem.GetCounter(ctx, key)
 }
 
+// GetGauge возвращает текущее значение метрики типа gauge.
 func (fs *FileStorage) GetGauge(ctx context.Context, key string) (float64, error) {
 	return fs.mem.GetGauge(ctx, key)
 }
 
+// GetMetrics возвращает все сохранённые метрики типа counter и gauge.
 func (fs *FileStorage) GetMetrics(ctx context.Context) (map[string]int64, map[string]float64, error) {
 	return fs.mem.GetMetrics(ctx)
 }
 
+// SetMetrics сохраняет переданные метрики в памяти.
 func (fs *FileStorage) SetMetrics(ctx context.Context, counter map[string]int64, gauge map[string]float64) error {
 	return fs.mem.SetMetrics(ctx, counter, gauge)
 }
@@ -123,6 +134,7 @@ func (fs *FileStorage) uploadToFile(ctx context.Context) error {
 	return nil
 }
 
+// RunSync запускает периодическую синхронизацию метрик с файлом.
 func (fs *FileStorage) RunSync() {
 	if fs.cfg.StoreInternal == 0 {
 		return
@@ -136,6 +148,7 @@ func (fs *FileStorage) RunSync() {
 	}()
 }
 
+// Restore восстанавливает метрики из файла при запуске сервера.
 func (fs *FileStorage) Restore() {
 	err := fs.consumer.Open()
 	if err != nil {
@@ -155,6 +168,7 @@ func (fs *FileStorage) Restore() {
 	}
 }
 
+// WaitShutDown ожидает завершения работы сервера и сохраняет метрики в файл.
 func (fs *FileStorage) WaitShutDown(ctx context.Context) {
 	go func() {
 		<-ctx.Done()

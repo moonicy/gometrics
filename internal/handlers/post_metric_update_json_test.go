@@ -2,7 +2,9 @@ package handlers
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 	"net/http/httptest"
@@ -55,4 +57,51 @@ func TestUpdateMetrics_updateJSONMetrics(t *testing.T) {
 			}
 		})
 	}
+}
+
+func ExampleMetricsHandler_PostMetricUpdateJSON() {
+	// Инициализируем хранилище.
+	memStorage := storage.NewMemStorage()
+
+	// Создаём новый MetricsHandler.
+	mh := NewMetricsHandler(memStorage, nil, nil)
+
+	// Создаём метрику для обновления в формате JSON.
+	metric := metrics.Metric{
+		MetricName: metrics.MetricName{
+			ID:    "Alloc",
+			MType: metrics.Gauge,
+		},
+		Value: new(float64),
+	}
+	*metric.Value = 12345.67
+
+	// Кодируем метрику в JSON.
+	body, _ := json.Marshal(metric)
+
+	// Создаём HTTP-запрос для обновления метрики.
+	req := httptest.NewRequest("POST", "/update", bytes.NewBuffer(body))
+	req.Header.Set("Content-Type", "application/json")
+
+	// Создаём Recorder для записи ответа.
+	rr := httptest.NewRecorder()
+
+	// Вызываем обработчик.
+	mh.PostMetricUpdateJSON(rr, req)
+
+	// Выводим статусный код.
+	fmt.Println("Status Code:", rr.Code)
+
+	// Проверяем, что метрика была обновлена.
+	value, err := memStorage.GetGauge(context.Background(), "Alloc")
+	if err != nil {
+		fmt.Println("Error:", err)
+	} else {
+		fmt.Printf("Updated Gauge Alloc: %.2f\n", value)
+	}
+
+	// Output:
+	// Alloc	gauge	12345.670000
+	// Status Code: 200
+	// Updated Gauge Alloc: 12345.67
 }

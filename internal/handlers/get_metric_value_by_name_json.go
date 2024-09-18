@@ -11,6 +11,9 @@ import (
 	"github.com/moonicy/gometrics/internal/storage"
 )
 
+// GetMetricValueByNameJSON обрабатывает HTTP-запрос в формате json для получения значения метрики по её имени и типу.
+// Он извлекает параметры из json и возвращает значение метрики клиенту.
+// В случае ошибки возвращает соответствующий HTTP-статус и сообщение об ошибке.
 func (mh *MetricsHandler) GetMetricValueByNameJSON(res http.ResponseWriter, req *http.Request) {
 	var mt metrics.MetricName
 

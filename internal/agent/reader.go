@@ -10,14 +10,17 @@ import (
 	gopsutil "github.com/shirou/gopsutil/v4/mem"
 )
 
+// MetricsReader отвечает за сбор метрик из Go runtime и системы.
 type MetricsReader struct {
-	rtm runtime.MemStats
+	rtm runtime.MemStats // Структура для хранения статистики памяти Go runtime.
 }
 
+// NewMetricsReader создаёт и возвращает новый экземпляр MetricsReader.
 func NewMetricsReader() *MetricsReader {
 	return &MetricsReader{}
 }
 
+// Read собирает метрики и сохраняет их в переданный Report.
 func (mr *MetricsReader) Read(mem *Report) {
 	v, err := gopsutil.VirtualMemory()
 	if err != nil {

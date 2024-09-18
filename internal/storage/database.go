@@ -10,6 +10,7 @@ import (
 	"github.com/jackc/pgx/v5/pgconn"
 )
 
+// DB определяет интерфейс для взаимодействия с базой данных.
 type DB interface {
 	ExecContext(ctx context.Context, query string, args ...any) (result sql.Result, err error)
 	QueryContext(ctx context.Context, query string, args ...any) (rows *sql.Rows, err error)
@@ -17,14 +18,17 @@ type DB interface {
 	Begin() (tx *sql.Tx, err error)
 }
 
+// DBStorage представляет хранилище метрик, использующее базу данных.
 type DBStorage struct {
 	db DB
 }
 
+// NewDBStorage создаёт и возвращает новое хранилище метрик с использованием заданного интерфейса DB.
 func NewDBStorage(db DB) *DBStorage {
 	return &DBStorage{db: db}
 }
 
+// Init инициализирует хранилище, создавая необходимые таблицы в базе данных.
 func (dbs *DBStorage) Init(ctx context.Context) error {
 	_, err := dbs.db.ExecContext(ctx, `CREATE TABLE IF NOT EXISTS gauge (id serial PRIMARY KEY, name text UNIQUE, value double precision)`)
 	if err != nil {
@@ -37,6 +41,7 @@ func (dbs *DBStorage) Init(ctx context.Context) error {
 	return nil
 }
 
+// SetGauge устанавливает значение метрики типа gauge с заданным именем и значением.
 func (dbs *DBStorage) SetGauge(ctx context.Context, key string, value float64) error {
 	_, err := dbs.db.ExecContext(ctx, `INSERT INTO gauge (name, value) VALUES ($1, $2)
 						ON CONFLICT (name) DO UPDATE SET value = $2`, key, value)
@@ -50,6 +55,7 @@ func (dbs *DBStorage) SetGauge(ctx context.Context, key string, value float64) e
 	return nil
 }
 
+// AddCounter увеличивает значение метрики типа counter с заданным именем на указанное значение.
 func (dbs *DBStorage) AddCounter(ctx context.Context, key string, value int64) error {
 	_, err := dbs.db.ExecContext(ctx, `INSERT INTO counter (name, value) VALUES ($1, $2)
 						ON CONFLICT (name) DO UPDATE SET value = counter.value + EXCLUDED.value`, key, value)
@@ -63,6 +69,7 @@ func (dbs *DBStorage) AddCounter(ctx context.Context, key string, value int64) e
 	return nil
 }
 
+// GetCounter возвращает текущее значение метрики типа counter с заданным именем.
 func (dbs *DBStorage) GetCounter(ctx context.Context, key string) (int64, error) {
 	row := dbs.db.QueryRowContext(ctx, `SELECT value FROM counter WHERE name = $1`, key)
 	var value sql.NullInt64
@@ -80,6 +87,7 @@ func (dbs *DBStorage) GetCounter(ctx context.Context, key string) (int64, error)
 	return 0, ErrNotValid
 }
 
+// GetGauge возвращает текущее значение метрики типа gauge с заданным именем.
 func (dbs *DBStorage) GetGauge(ctx context.Context, key string) (float64, error) {
 	row := dbs.db.QueryRowContext(ctx, `SELECT value FROM gauge WHERE name = $1`, key)
 	var value sql.NullFloat64
@@ -97,6 +105,7 @@ func (dbs *DBStorage) GetGauge(ctx context.Context, key string) (float64, error)
 	return 0, ErrNotValid
 }
 
+// GetMetrics возвращает все сохранённые метрики типа counter и gauge.
 func (dbs *DBStorage) GetMetrics(ctx context.Context) (map[string]int64, map[string]float64, error) {
 	rowsGauge, err := dbs.db.QueryContext(ctx, `SELECT name, value FROM gauge ORDER BY name`)
 	if err != nil {
@@ -149,6 +158,7 @@ func (dbs *DBStorage) GetMetrics(ctx context.Context) (map[string]int64, map[str
 	return counter, gauge, nil
 }
 
+// SetMetrics сохраняет переданные метрики типа counter и gauge в базе данных.
 func (dbs *DBStorage) SetMetrics(ctx context.Context, counter map[string]int64, gauge map[string]float64) error {
 	tx, err := dbs.db.Begin()
 	if err != nil {

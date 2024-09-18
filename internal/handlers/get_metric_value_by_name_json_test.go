@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 	"net/http/httptest"
@@ -63,4 +64,38 @@ func TestMetricsHandler_GetJSONMetricsByName(t *testing.T) {
 			}
 		})
 	}
+}
+
+func ExampleMetricsHandler_GetMetricValueByNameJSON() {
+	// Инициализируем хранилище и добавляем метрику типа gauge.
+	memStorage := storage.NewMemStorage()
+	_ = memStorage.SetGauge(context.Background(), "Alloc", 12345.67)
+
+	// Создаём новый MetricsHandler.
+	mh := NewMetricsHandler(memStorage, nil, nil)
+
+	// Подготавливаем тело запроса в формате JSON.
+	metricName := metrics.MetricName{
+		ID:    "Alloc",
+		MType: metrics.Gauge,
+	}
+	requestBody, _ := json.Marshal(metricName)
+
+	// Создаём новый HTTP-запрос с телом в формате JSON.
+	req := httptest.NewRequest("POST", "/value/", bytes.NewBuffer(requestBody))
+	req.Header.Set("Content-Type", "application/json")
+
+	// Создаём Recorder для записи HTTP-ответа.
+	rr := httptest.NewRecorder()
+
+	// Вызываем обработчик.
+	mh.GetMetricValueByNameJSON(rr, req)
+
+	// Выводим статусный код и тело ответа.
+	fmt.Println("Status Code:", rr.Code)
+	fmt.Println("Body:", rr.Body.String())
+
+	// Output:
+	// Status Code: 200
+	// Body: {"id":"Alloc","type":"gauge","value":12345.67}
 }

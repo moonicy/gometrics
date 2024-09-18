@@ -6,15 +6,23 @@ import (
 	"strconv"
 )
 
+// ServerConfig хранит информацию о конфгурации сервера.
 type ServerConfig struct {
-	Host            string
-	StoreInternal   int
+	// Host - адрес эндпоинта HTTP-сервера.
+	Host string
+	// StoreInternal - интервал времени в секундах, по истечении которого текущие показания сервера сохраняются на диск.
+	StoreInternal int
+	// FileStoragePath - полное имя файла, куда сохраняются текущие значения.
 	FileStoragePath string
-	Restore         bool
-	DatabaseDsn     string
-	HashKey         string
+	// Restore - (булево) определяет, загружать или нет ранее сохранённые значения из файла при старте сервера.
+	Restore bool
+	// DatabaseDsn - строка с адресом подключения к БД.
+	DatabaseDsn string
+	// HashKey - ключ для хеша.
+	HashKey string
 }
 
+// NewServerConfig создаёт и возвращает новый экземпляр ServerConfig, инициализированный с помощью флагов.
 func NewServerConfig() ServerConfig {
 	sc := ServerConfig{}
 	sc.parseFlag()

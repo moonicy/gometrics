@@ -2,7 +2,9 @@ package handlers
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 	"net/http/httptest"
@@ -67,4 +69,69 @@ func TestMetricsHandler_UpdatesJSONMetrics(t *testing.T) {
 			}
 		})
 	}
+}
+
+func ExampleMetricsHandler_PostMetricsUpdatesJSON() {
+	// Инициализируем хранилище.
+	memStorage := storage.NewMemStorage()
+
+	// Создаём новый MetricsHandler.
+	mh := NewMetricsHandler(memStorage, nil, nil)
+
+	// Создаём несколько метрик для обновления в формате JSON.
+	metricsToUpdate := []metrics.Metric{
+		{
+			MetricName: metrics.MetricName{
+				ID:    "Alloc",
+				MType: metrics.Gauge,
+			},
+			Value: new(float64),
+		},
+		{
+			MetricName: metrics.MetricName{
+				ID:    "PollCount",
+				MType: metrics.Counter,
+			},
+			Delta: new(int64),
+		},
+	}
+
+	*metricsToUpdate[0].Value = 12345.67
+	*metricsToUpdate[1].Delta = 42
+
+	// Кодируем метрики в JSON.
+	body, _ := json.Marshal(metricsToUpdate)
+
+	// Создаём HTTP-запрос для обновления метрик.
+	req := httptest.NewRequest("POST", "/updates", bytes.NewBuffer(body))
+	req.Header.Set("Content-Type", "application/json")
+
+	// Создаём Recorder для записи ответа.
+	rr := httptest.NewRecorder()
+
+	// Вызываем обработчик.
+	mh.PostMetricsUpdatesJSON(rr, req)
+
+	// Выводим статусный код.
+	fmt.Println("Status Code:", rr.Code)
+
+	// Проверяем, что метрики были обновлены.
+	valueGauge, err := memStorage.GetGauge(context.Background(), "Alloc")
+	if err != nil {
+		fmt.Println("Error:", err)
+	} else {
+		fmt.Printf("Updated Gauge Alloc: %.2f\n", valueGauge)
+	}
+
+	valueCounter, err := memStorage.GetCounter(context.Background(), "PollCount")
+	if err != nil {
+		fmt.Println("Error:", err)
+	} else {
+		fmt.Printf("Updated Counter PollCount: %d\n", valueCounter)
+	}
+
+	// Output:
+	// Status Code: 200
+	// Updated Gauge Alloc: 12345.67
+	// Updated Counter PollCount: 42
 }

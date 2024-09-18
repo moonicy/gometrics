@@ -7,14 +7,21 @@ import (
 	"strconv"
 )
 
+// AgentConfig хранит информацию о конфгурации агента.
 type AgentConfig struct {
-	Host           string
+	// Host - адрес эндпоинта HTTP-сервера.
+	Host string
+	// ReportInterval - частота отправки метрик на сервер.
 	ReportInterval int
-	PollInterval   int
-	HashKey        string
-	RateLimit      int
+	// PollInterval - частота опроса метрик из пакета runtime.
+	PollInterval int
+	// HashKey - ключ для хеша.
+	HashKey string
+	// RateLimit - количество одновременно исходящих запросов на сервер.
+	RateLimit int
 }
 
+// NewAgentConfig создаёт и возвращает новый экземпляр AgentConfig, инициализированный с помощью флагов.
 func NewAgentConfig() AgentConfig {
 	ac := AgentConfig{}
 	ac.parseFlag()
