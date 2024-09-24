@@ -1,9 +1,9 @@
 package client
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
+	jsoniter "github.com/json-iterator/go"
 	"github.com/moonicy/gometrics/internal/agent"
 	m "github.com/moonicy/gometrics/internal/metrics"
 	"github.com/moonicy/gometrics/pkg/gzip"
@@ -29,28 +29,7 @@ func NewClient(host string, key string) *Client {
 }
 
 func (cl *Client) SendReport(report *agent.Report) {
-	metrics := make([]m.Metric, 0, len(report.Gauge)+len(report.Counter))
-	for k, v := range report.Counter {
-		metrics = append(metrics, m.Metric{
-			MetricName: m.MetricName{
-				ID:    k,
-				MType: m.Counter,
-			},
-			Delta: &v,
-			Value: nil,
-		})
-	}
-	for k, v := range report.Gauge {
-		metrics = append(metrics, m.Metric{
-			MetricName: m.MetricName{
-				ID:    k,
-				MType: m.Gauge,
-			},
-			Delta: nil,
-			Value: &v,
-		})
-	}
-	out, err := json.Marshal(metrics)
+	out, err := cl.makeRequestData(report)
 	if err != nil {
 		log.Print(err)
 		return
@@ -104,4 +83,38 @@ func (cl *Client) SendReport(report *agent.Report) {
 	if resp.StatusCode != http.StatusOK {
 		log.Print("Wrong status code", resp.Status)
 	}
+}
+
+func (cl *Client) makeRequestData(report *agent.Report) ([]byte, error) {
+	metrics := make([]m.Metric, 0, report.GetCommonCount())
+	report.Counter.Range(func(key, value any) bool {
+		v := value.(int64)
+		metrics = append(metrics, m.Metric{
+			MetricName: m.MetricName{
+				ID:    key.(string),
+				MType: m.Counter,
+			},
+			Delta: &v,
+			Value: nil,
+		})
+		return true
+	})
+	report.Gauge.Range(func(key, value any) bool {
+		v := value.(float64)
+		metrics = append(metrics, m.Metric{
+			MetricName: m.MetricName{
+				ID:    key.(string),
+				MType: m.Gauge,
+			},
+			Delta: nil,
+			Value: &v,
+		})
+		return true
+	})
+	out, err := jsoniter.Marshal(metrics)
+	if err != nil {
+		log.Print(err)
+		return nil, err
+	}
+	return out, nil
 }

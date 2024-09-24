@@ -1,0 +1,179 @@
+pprof -top -diff_base=profiles/base.pprof profiles/result.pprof
+File: client.test
+Type: cpu
+Time: Sep 15, 2024 at 5:19pm (EEST)
+Duration: 2.91s, Total samples = 1.10s (37.75%)
+Showing nodes accounting for -0.07s, 6.36% of 1.10s total
+Dropped 3 nodes (cum <= 0.01s)
+      flat  flat%   sum%        cum   cum%
+     0.15s 13.64% 13.64%      0.15s 13.64%  github.com/json-iterator/go.(*Stream).WriteStringWithHTMLEscaped
+    -0.08s  7.27%  6.36%     -0.11s 10.00%  encoding/json.appendString[go.shape.string]
+    -0.08s  7.27%  0.91%     -0.46s 41.82%  encoding/json.structEncoder.encode
+     0.08s  7.27%  6.36%      0.09s  8.18%  github.com/json-iterator/go.(*structFieldEncoder).IsEmbeddedPtrNil
+    -0.06s  5.45%  0.91%     -0.06s  5.45%  runtime.futex
+     0.06s  5.45%  6.36%      0.06s  5.45%  strconv.ryuDigits32
+     0.05s  4.55% 10.91%      0.05s  4.55%  github.com/json-iterator/go.(*Stream).WriteString
+     0.05s  4.55% 15.45%      0.11s 10.00%  github.com/moonicy/gometrics/internal/client.(*Client).makeRequestData.func2
+    -0.05s  4.55% 10.91%     -0.23s 20.91%  runtime.mapassign_faststr
+    -0.05s  4.55%  6.36%     -0.05s  4.55%  runtime.memmove
+    -0.04s  3.64%  2.73%     -0.04s  3.64%  aeshashbody
+     0.04s  3.64%  6.36%      0.53s 48.18%  github.com/json-iterator/go.(*structFieldEncoder).Encode
+    -0.03s  2.73%  3.64%     -0.26s 23.64%  github.com/moonicy/gometrics/internal/agent.(*Report).GetGauges
+    -0.03s  2.73%  0.91%      0.02s  1.82%  github.com/moonicy/gometrics/internal/client.(*Client).makeRequestData
+    -0.03s  2.73%  1.82%     -0.03s  2.73%  internal/abi.(*Type).Kind (inline)
+     0.03s  2.73%  0.91%      0.03s  2.73%  runtime/internal/atomic.(*Uint32).Add (inline)
+     0.03s  2.73%  3.64%      0.11s 10.00%  strconv.ryuDigits
+     0.03s  2.73%  6.36%      0.15s 13.64%  strconv.ryuFtoaShortest
+    -0.02s  1.82%  4.55%     -0.02s  1.82%  bytes.(*Buffer).WriteByte
+    -0.02s  1.82%  2.73%     -0.03s  2.73%  bytes.(*Buffer).WriteString
+     0.02s  1.82%  4.55%      0.31s 28.18%  github.com/json-iterator/go.(*OptionalEncoder).Encode
+     0.02s  1.82%  6.36%      0.07s  6.36%  github.com/json-iterator/go.(*Stream).WriteObjectField
+     0.02s  1.82%  8.18%      0.17s 15.45%  github.com/json-iterator/go.(*htmlEscapedStringEncoder).Encode
+     0.02s  1.82% 10.00%      0.02s  1.82%  github.com/modern-go/reflect2.(*UnsafeStructField).UnsafeGet
+     0.02s  1.82% 11.82%      0.02s  1.82%  github.com/modern-go/reflect2.add (inline)
+    -0.02s  1.82% 10.00%     -0.04s  3.64%  runtime.evacuate_faststr
+    -0.02s  1.82%  8.18%     -0.01s  0.91%  runtime.scanblock
+    -0.02s  1.82%  6.36%     -0.02s  1.82%  runtime.tgkill
+    -0.02s  1.82%  4.55%     -0.04s  3.64%  runtime.wbBufFlush1
+    -0.01s  0.91%  3.64%     -0.02s  1.82%  bytes.(*Buffer).Write
+    -0.01s  0.91%  2.73%     -0.01s  0.91%  bytes.(*Buffer).tryGrowByReslice (inline)
+    -0.01s  0.91%  1.82%     -0.48s 43.64%  encoding/json.arrayEncoder.encode
+    -0.01s  0.91%  0.91%     -0.14s 12.73%  encoding/json.floatEncoder.encode
+    -0.01s  0.91%     0%     -0.17s 15.45%  encoding/json.ptrEncoder.encode
+     0.01s  0.91%  0.91%      0.01s  0.91%  github.com/json-iterator/go.(*OptionalEncoder).IsEmpty
+     0.01s  0.91%  1.82%      0.01s  0.91%  github.com/json-iterator/go.(*Stream).WriteMore (inline)
+     0.01s  0.91%  2.73%      0.75s 68.18%  github.com/json-iterator/go.(*sliceEncoder).Encode
+     0.01s  0.91%  3.64%      0.71s 64.55%  github.com/json-iterator/go.(*structEncoder).Encode
+     0.01s  0.91%  4.55%      0.01s  0.91%  math.Float64bits (inline)
+    -0.01s  0.91%  3.64%     -0.02s  1.82%  reflect.Value.Elem
+    -0.01s  0.91%  2.73%     -0.03s  2.73%  reflect.Value.Field
+    -0.01s  0.91%  1.82%     -0.01s  0.91%  reflect.Value.IsNil (inline)
+    -0.01s  0.91%  0.91%     -0.01s  0.91%  runtime.(*activeSweep).begin
+    -0.01s  0.91%     0%     -0.01s  0.91%  runtime.(*bmap).overflow (inline)
+    -0.01s  0.91%  0.91%     -0.01s  0.91%  runtime.(*gcBitsArena).tryAlloc (inline)
+    -0.01s  0.91%  1.82%     -0.01s  0.91%  runtime.(*hmap).noldbuckets (inline)
+    -0.01s  0.91%  2.73%     -0.02s  1.82%  runtime.(*mspan).writeHeapBitsSmall
+    -0.01s  0.91%  3.64%     -0.01s  0.91%  runtime.acquirem (inline)
+    -0.01s  0.91%  4.55%     -0.01s  0.91%  runtime.alignUp (inline)
+    -0.01s  0.91%  5.45%     -0.01s  0.91%  runtime.bucketShift (inline)
+    -0.01s  0.91%  6.36%     -0.02s  1.82%  runtime.bulkBarrierPreWrite
+     0.01s  0.91%  5.45%     -0.01s  0.91%  runtime.deductAssistCredit
+     0.01s  0.91%  4.55%     -0.02s  1.82%  runtime.gcDrain
+    -0.01s  0.91%  5.45%     -0.05s  4.55%  runtime.growWork_faststr
+     0.01s  0.91%  4.55%      0.01s  0.91%  runtime.headTailIndex.head (inline)
+    -0.01s  0.91%  5.45%     -0.01s  0.91%  runtime.heapBitsSlice (inline)
+    -0.01s  0.91%  6.36%     -0.01s  0.91%  runtime.isEmpty (inline)
+     0.01s  0.91%  5.45%      0.02s  1.82%  runtime.makeslice
+    -0.01s  0.91%  6.36%     -0.01s  0.91%  runtime.mapiterinit
+     0.01s  0.91%  5.45%     -0.01s  0.91%  runtime.mapiternext
+    -0.01s  0.91%  6.36%     -0.01s  0.91%  runtime.nextFreeFast (inline)
+    -0.01s  0.91%  7.27%     -0.01s  0.91%  runtime.readgstatus (inline)
+     0.01s  0.91%  6.36%      0.01s  0.91%  runtime.releasem (inline)
+    -0.01s  0.91%  7.27%     -0.01s  0.91%  runtime.spanOf (inline)
+    -0.01s  0.91%  8.18%     -0.01s  0.91%  runtime.tracebackPCs
+    -0.01s  0.91%  9.09%     -0.01s  0.91%  runtime.typePointers.next
+    -0.01s  0.91% 10.00%     -0.02s  1.82%  runtime.unlock2
+     0.01s  0.91%  9.09%      0.01s  0.91%  runtime/internal/syscall.Syscall6
+     0.01s  0.91%  8.18%      0.01s  0.91%  strconv.divmod1e9 (inline)
+     0.01s  0.91%  7.27%      0.01s  0.91%  strconv.mult128bitPow10
+     0.01s  0.91%  6.36%      0.17s 15.45%  sync.(*Map).Range
+         0     0%  6.36%     -0.48s 43.64%  encoding/json.(*encodeState).marshal
+         0     0%  6.36%     -0.48s 43.64%  encoding/json.(*encodeState).reflectValue
+         0     0%  6.36%     -0.52s 47.27%  encoding/json.Marshal
+         0     0%  6.36%     -0.01s  0.91%  encoding/json.isEmptyValue
+         0     0%  6.36%     -0.48s 43.64%  encoding/json.sliceEncoder.encode
+         0     0%  6.36%     -0.13s 11.82%  encoding/json.stringEncoder
+         0     0%  6.36%      0.29s 26.36%  github.com/json-iterator/go.(*Stream).WriteFloat64
+         0     0%  6.36%      0.75s 68.18%  github.com/json-iterator/go.(*Stream).WriteVal
+         0     0%  6.36%      0.29s 26.36%  github.com/json-iterator/go.(*float64Codec).Encode
+         0     0%  6.36%      0.76s 69.09%  github.com/json-iterator/go.(*frozenConfig).Marshal
+         0     0%  6.36%      0.01s  0.91%  github.com/json-iterator/go.(*structFieldEncoder).IsEmpty
+         0     0%  6.36%      0.76s 69.09%  github.com/json-iterator/go.Marshal (inline)
+         0     0%  6.36%      0.02s  1.82%  github.com/modern-go/reflect2.(*UnsafeSliceType).UnsafeGetIndex (inline)
+         0     0%  6.36%      0.02s  1.82%  github.com/modern-go/reflect2.arrayAt (inline)
+         0     0%  6.36%     -0.04s  3.64%  github.com/moonicy/gometrics/internal/agent.(*Report).GetCounters
+         0     0%  6.36%      0.02s  1.82%  github.com/moonicy/gometrics/internal/client.(*Client).makeRequestData.func1
+         0     0%  6.36%      0.02s  1.82%  github.com/moonicy/gometrics/internal/client.BenchmarkClient_makeResponseData
+         0     0%  6.36%      0.01s  0.91%  math.Abs (inline)
+         0     0%  6.36%     -0.01s  0.91%  reflect.Value.IsZero
+         0     0%  6.36%      0.02s  1.82%  runtime.(*consistentHeapStats).acquire
+         0     0%  6.36%     -0.01s  0.91%  runtime.(*gcControllerState).enlistWorker
+         0     0%  6.36%     -0.01s  0.91%  runtime.(*gcWork).balance
+         0     0%  6.36%     -0.01s  0.91%  runtime.(*hmap).newoverflow
+         0     0%  6.36%      0.01s  0.91%  runtime.(*mcache).prepareForSweep
+         0     0%  6.36%      0.01s  0.91%  runtime.(*mcache).releaseAll
+         0     0%  6.36%      0.01s  0.91%  runtime.(*mheap).freeSpan
+         0     0%  6.36%      0.01s  0.91%  runtime.(*mheap).freeSpanLocked
+         0     0%  6.36%      0.01s  0.91%  runtime.(*mheap).nextSpanForSweep
+         0     0%  6.36%     -0.01s  0.91%  runtime.(*mspan).heapBits
+         0     0%  6.36%      0.01s  0.91%  runtime.(*spanSet).pop
+         0     0%  6.36%      0.01s  0.91%  runtime.(*sweepLocked).sweep.(*mheap).freeSpan.func3
+         0     0%  6.36%     -0.01s  0.91%  runtime.(*wbBuf).get2 (inline)
+         0     0%  6.36%     -0.01s  0.91%  runtime.addspecial
+         0     0%  6.36%     -0.01s  0.91%  runtime.callers
+         0     0%  6.36%     -0.01s  0.91%  runtime.callers.func1
+         0     0%  6.36%     -0.05s  4.55%  runtime.findRunnable
+         0     0%  6.36%     -0.01s  0.91%  runtime.forEachP (inline)
+         0     0%  6.36%     -0.01s  0.91%  runtime.forEachPInternal
+         0     0%  6.36%     -0.02s  1.82%  runtime.futexsleep
+         0     0%  6.36%     -0.04s  3.64%  runtime.futexwakeup
+         0     0%  6.36%     -0.02s  1.82%  runtime.gcAssistAlloc
+         0     0%  6.36%     -0.02s  1.82%  runtime.gcAssistAlloc.func1
+         0     0%  6.36%     -0.02s  1.82%  runtime.gcAssistAlloc1
+         0     0%  6.36%     -0.03s  2.73%  runtime.gcBgMarkWorker
+         0     0%  6.36%     -0.02s  1.82%  runtime.gcBgMarkWorker.func2
+         0     0%  6.36%     -0.02s  1.82%  runtime.gcDrainMarkWorkerDedicated (inline)
+         0     0%  6.36%     -0.02s  1.82%  runtime.gcDrainN
+         0     0%  6.36%     -0.01s  0.91%  runtime.gcMarkDone
+         0     0%  6.36%     -0.02s  1.82%  runtime.gcMarkDone.forEachP.func5
+         0     0%  6.36%     -0.02s  1.82%  runtime.gcMarkDone.func1
+         0     0%  6.36%      0.01s  0.91%  runtime.gcMarkTermination
+         0     0%  6.36%      0.01s  0.91%  runtime.gcMarkTermination.forEachP.func6
+         0     0%  6.36%      0.01s  0.91%  runtime.gcMarkTermination.func4
+         0     0%  6.36%     -0.05s  4.55%  runtime.gopreempt_m (inline)
+         0     0%  6.36%     -0.05s  4.55%  runtime.goschedImpl
+         0     0%  6.36%     -0.04s  3.64%  runtime.growslice
+         0     0%  6.36%     -0.04s  3.64%  runtime.hashGrow
+         0     0%  6.36%      0.01s  0.91%  runtime.headTailIndex.split (inline)
+         0     0%  6.36%     -0.02s  1.82%  runtime.heapSetType
+         0     0%  6.36%     -0.01s  0.91%  runtime.mPark (inline)
+         0     0%  6.36%     -0.02s  1.82%  runtime.mProf_Malloc
+         0     0%  6.36%     -0.01s  0.91%  runtime.mProf_Malloc.func1
+         0     0%  6.36%     -0.04s  3.64%  runtime.makeBucketArray
+         0     0%  6.36%     -0.07s  6.36%  runtime.mallocgc
+         0     0%  6.36%     -0.03s  2.73%  runtime.markroot
+         0     0%  6.36%     -0.01s  0.91%  runtime.markroot.func1
+         0     0%  6.36%     -0.01s  0.91%  runtime.markrootBlock
+         0     0%  6.36%     -0.05s  4.55%  runtime.morestack
+         0     0%  6.36%      0.01s  0.91%  runtime.netpoll
+         0     0%  6.36%     -0.01s  0.91%  runtime.newMarkBits
+         0     0%  6.36%     -0.04s  3.64%  runtime.newarray
+         0     0%  6.36%     -0.01s  0.91%  runtime.newobject (partial-inline)
+         0     0%  6.36%     -0.05s  4.55%  runtime.newstack
+         0     0%  6.36%     -0.01s  0.91%  runtime.notesleep
+         0     0%  6.36%     -0.01s  0.91%  runtime.notetsleep
+         0     0%  6.36%     -0.01s  0.91%  runtime.notetsleep_internal
+         0     0%  6.36%     -0.03s  2.73%  runtime.notewakeup
+         0     0%  6.36%     -0.01s  0.91%  runtime.overLoadFactor (inline)
+         0     0%  6.36%     -0.02s  1.82%  runtime.preemptM (inline)
+         0     0%  6.36%     -0.01s  0.91%  runtime.preemptone
+         0     0%  6.36%     -0.02s  1.82%  runtime.profilealloc
+         0     0%  6.36%     -0.04s  3.64%  runtime.runSafePointFn
+         0     0%  6.36%     -0.05s  4.55%  runtime.schedule
+         0     0%  6.36%     -0.01s  0.91%  runtime.setprofilebucket
+         0     0%  6.36%     -0.02s  1.82%  runtime.signalM
+         0     0%  6.36%     -0.01s  0.91%  runtime.startm
+         0     0%  6.36%     -0.01s  0.91%  runtime.stopm
+         0     0%  6.36%     -0.01s  0.91%  runtime.suspendG
+         0     0%  6.36%     -0.07s  6.36%  runtime.systemstack
+         0     0%  6.36%     -0.02s  1.82%  runtime.unlock (inline)
+         0     0%  6.36%     -0.02s  1.82%  runtime.unlockWithRank (inline)
+         0     0%  6.36%     -0.01s  0.91%  runtime.wakep
+         0     0%  6.36%     -0.02s  1.82%  runtime.wbBufFlush
+         0     0%  6.36%     -0.02s  1.82%  runtime.wbBufFlush.func1
+         0     0%  6.36%     -0.02s  1.82%  runtime.wbMove
+         0     0%  6.36%      0.01s  0.91%  runtime/internal/syscall.EpollWait
+         0     0%  6.36%      0.15s 13.64%  strconv.AppendFloat (inline)
+         0     0%  6.36%      0.15s 13.64%  strconv.genericFtoa
+         0     0%  6.36%      0.02s  1.82%  testing.(*B).launch
+         0     0%  6.36%      0.02s  1.82%  testing.(*B).runN

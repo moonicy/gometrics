@@ -24,14 +24,24 @@ func TestClient_SendReport(t *testing.T) {
 	defer server.Close()
 
 	report := agent.NewReport()
-	report.Gauge[agent.Alloc] = 11
-	report.Gauge[agent.Frees] = 22
-	report.Gauge[agent.GCSys] = 33
-	report.Counter[agent.PollCount] = 33
+	report.SetGauge(agent.Alloc, 11)
+	report.SetGauge(agent.Frees, 22)
+	report.SetGauge(agent.GCSys, 33)
+	report.AddCounter(agent.PollCount, 33)
 
 	cl := &Client{
 		httpClient: http.DefaultClient,
 		host:       server.URL,
 	}
 	cl.SendReport(report)
+}
+
+func BenchmarkClient_makeResponseData(b *testing.B) {
+	client := &Client{}
+	report := agent.NewReport()
+	reader := agent.NewMetricsReader()
+	reader.Read(report)
+	for i := 0; i < b.N; i++ {
+		_, _ = client.makeRequestData(report)
+	}
 }

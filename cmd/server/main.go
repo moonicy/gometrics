@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"errors"
+	"github.com/go-chi/chi/v5"
 	_ "github.com/jackc/pgx/v5/stdlib"
 	"github.com/moonicy/gometrics/internal/config"
 	"github.com/moonicy/gometrics/internal/file"
@@ -10,6 +11,7 @@ import (
 	database2 "github.com/moonicy/gometrics/pkg/database"
 	"github.com/moonicy/gometrics/pkg/logger"
 	"net/http"
+	"net/http/pprof"
 	"os"
 	"os/signal"
 	"sync"
@@ -49,6 +51,8 @@ func main() {
 		"addr", cfg.Host,
 	)
 
+	AttachProfiler(route)
+
 	server := &http.Server{
 		Addr:    cfg.Host,
 		Handler: route,
@@ -76,4 +80,16 @@ func main() {
 	cancel()
 	wg.Wait()
 	time.Sleep(1 * time.Second)
+}
+
+func AttachProfiler(router *chi.Mux) {
+	router.HandleFunc("/debug/pprof/", pprof.Index)
+	router.HandleFunc("/debug/pprof/cmdline", pprof.Cmdline)
+	router.HandleFunc("/debug/pprof/profile", pprof.Profile)
+	router.HandleFunc("/debug/pprof/symbol", pprof.Symbol)
+
+	router.Handle("/debug/pprof/goroutine", pprof.Handler("goroutine"))
+	router.Handle("/debug/pprof/heap", pprof.Handler("heap"))
+	router.Handle("/debug/pprof/threadcreate", pprof.Handler("threadcreate"))
+	router.Handle("/debug/pprof/block", pprof.Handler("block"))
 }
