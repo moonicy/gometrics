@@ -3,9 +3,10 @@ package handlers
 import (
 	"encoding/json"
 	"errors"
-	"github.com/moonicy/gometrics/internal/metrics"
 	"io"
 	"net/http"
+
+	"github.com/moonicy/gometrics/internal/metrics"
 )
 
 func (mh *MetricsHandler) PostMetricsUpdatesJSON(res http.ResponseWriter, req *http.Request) {

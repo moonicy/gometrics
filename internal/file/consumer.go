@@ -3,8 +3,9 @@ package file
 import (
 	"bufio"
 	"encoding/json"
-	"github.com/moonicy/gometrics/pkg/retry"
 	"os"
+
+	"github.com/moonicy/gometrics/pkg/retry"
 )
 
 type Consumer struct {

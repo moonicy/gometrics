@@ -1,13 +1,14 @@
 package main
 
 import (
+	"net/http"
+	_ "net/http/pprof"
+	"sync"
+
 	"github.com/moonicy/gometrics/internal/agent"
 	"github.com/moonicy/gometrics/internal/agent/workerpool"
 	metricsClient "github.com/moonicy/gometrics/internal/client"
 	"github.com/moonicy/gometrics/internal/config"
-	"net/http"
-	_ "net/http/pprof"
-	"sync"
 )
 
 func main() {

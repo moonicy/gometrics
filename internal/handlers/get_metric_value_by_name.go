@@ -3,11 +3,13 @@ package handlers
 import (
 	"errors"
 	"fmt"
+	"net/http"
+
 	"github.com/go-chi/chi/v5"
+
 	"github.com/moonicy/gometrics/internal/metrics"
 	"github.com/moonicy/gometrics/internal/storage"
 	"github.com/moonicy/gometrics/pkg/floattostr"
-	"net/http"
 )
 
 func (mh *MetricsHandler) GetMetricValueByName(res http.ResponseWriter, req *http.Request) {

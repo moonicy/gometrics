@@ -1,10 +1,11 @@
 package workerpool
 
 import (
+	"time"
+
 	"github.com/moonicy/gometrics/internal/agent"
 	"github.com/moonicy/gometrics/internal/config"
 	"github.com/moonicy/gometrics/pkg/workerpool"
-	"time"
 )
 
 func RunReadMetrics(cfg config.AgentConfig, reader *agent.MetricsReader, mem *agent.Report, callback func()) func() {

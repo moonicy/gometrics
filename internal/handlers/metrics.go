@@ -2,9 +2,11 @@ package handlers
 
 import (
 	"context"
+
+	"go.uber.org/zap"
+
 	"github.com/moonicy/gometrics/internal/config"
 	"github.com/moonicy/gometrics/internal/storage"
-	"go.uber.org/zap"
 )
 
 type Pingable interface {

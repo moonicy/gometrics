@@ -3,13 +3,6 @@ package main
 import (
 	"context"
 	"errors"
-	"github.com/go-chi/chi/v5"
-	_ "github.com/jackc/pgx/v5/stdlib"
-	"github.com/moonicy/gometrics/internal/config"
-	"github.com/moonicy/gometrics/internal/file"
-	"github.com/moonicy/gometrics/internal/handlers"
-	database2 "github.com/moonicy/gometrics/pkg/database"
-	"github.com/moonicy/gometrics/pkg/logger"
 	"net/http"
 	"net/http/pprof"
 	"os"
@@ -17,6 +10,15 @@ import (
 	"sync"
 	"syscall"
 	"time"
+
+	"github.com/go-chi/chi/v5"
+	_ "github.com/jackc/pgx/v5/stdlib"
+
+	"github.com/moonicy/gometrics/internal/config"
+	"github.com/moonicy/gometrics/internal/file"
+	"github.com/moonicy/gometrics/internal/handlers"
+	database2 "github.com/moonicy/gometrics/pkg/database"
+	"github.com/moonicy/gometrics/pkg/logger"
 )
 
 func main() {

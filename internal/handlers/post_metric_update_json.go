@@ -4,10 +4,11 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/moonicy/gometrics/internal/metrics"
 	"io"
 	"log"
 	"net/http"
+
+	"github.com/moonicy/gometrics/internal/metrics"
 )
 
 func (mh *MetricsHandler) PostMetricUpdateJSON(res http.ResponseWriter, req *http.Request) {

@@ -1,9 +1,10 @@
 package middlewares
 
 import (
-	"github.com/moonicy/gometrics/pkg/gzip"
 	"net/http"
 	"strings"
+
+	"github.com/moonicy/gometrics/pkg/gzip"
 )
 
 func GzipMiddleware(h http.Handler) http.Handler {

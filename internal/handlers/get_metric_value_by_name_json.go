@@ -3,11 +3,12 @@ package handlers
 import (
 	"encoding/json"
 	"errors"
-	"github.com/moonicy/gometrics/internal/metrics"
-	"github.com/moonicy/gometrics/internal/storage"
 	"io"
 	"log"
 	"net/http"
+
+	"github.com/moonicy/gometrics/internal/metrics"
+	"github.com/moonicy/gometrics/internal/storage"
 )
 
 func (mh *MetricsHandler) GetMetricValueByNameJSON(res http.ResponseWriter, req *http.Request) {
