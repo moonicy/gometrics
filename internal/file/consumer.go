@@ -8,16 +8,20 @@ import (
 	"github.com/moonicy/gometrics/pkg/retry"
 )
 
+// Consumer читает события из файла.
 type Consumer struct {
 	file     *os.File
 	filename string
 	scanner  *bufio.Scanner
 }
 
+// NewConsumer создаёт и возвращает новый Consumer для указанного файла.
 func NewConsumer(filename string) *Consumer {
 	return &Consumer{filename: filename}
 }
 
+// Open открывает файл для чтения и инициализирует сканер.
+// В случае ошибок доступа выполняет повторные попытки.
 func (c *Consumer) Open() error {
 	var file *os.File
 	var err error
@@ -38,6 +42,8 @@ func (c *Consumer) Open() error {
 	return nil
 }
 
+// ReadEvent читает следующее событие из файла.
+// Возвращает Event или ошибку при неудачном чтении.
 func (c *Consumer) ReadEvent() (*Event, error) {
 	if !c.scanner.Scan() {
 		return nil, c.scanner.Err()
@@ -53,6 +59,7 @@ func (c *Consumer) ReadEvent() (*Event, error) {
 	return &event, nil
 }
 
+// Close закрывает файл и освобождает связанные ресурсы.
 func (c *Consumer) Close() error {
 	defer func() {
 		c.file = nil

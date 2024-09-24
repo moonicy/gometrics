@@ -8,6 +8,9 @@ import (
 	"github.com/moonicy/gometrics/pkg/workerpool"
 )
 
+// RunReadMetrics запускает горутину для периодического чтения метрик и их сохранения в Report.
+// Она использует пул воркеров для выполнения задач чтения метрик с заданным интервалом.
+// При завершении возвращает функцию для корректного закрытия пула воркеров.
 func RunReadMetrics(cfg config.AgentConfig, reader *agent.MetricsReader, mem *agent.Report, callback func()) func() {
 	var pollInterval = time.Duration(cfg.PollInterval) * time.Second
 

@@ -59,3 +59,35 @@ func TestMetricsHandler_GetMetricsByName(t *testing.T) {
 		})
 	}
 }
+
+func ExampleMetricsHandler_GetMetricValueByName() {
+	// Инициализируем хранилище и добавляем метрику типа gauge.
+	memStorage := storage.NewMemStorage()
+	_ = memStorage.SetGauge(context.Background(), "Alloc", 12345.67)
+
+	// Создаём новый MetricsHandler.
+	mh := NewMetricsHandler(memStorage, nil, nil)
+
+	// Создаём новый HTTP-запрос.
+	req := httptest.NewRequest("GET", "/value/gauge/Alloc", nil)
+
+	// Устанавливаем параметры URL в контексте chi.
+	rctx := chi.NewRouteContext()
+	rctx.URLParams.Add("type", "gauge")
+	rctx.URLParams.Add("name", "Alloc")
+	req = req.WithContext(context.WithValue(req.Context(), chi.RouteCtxKey, rctx))
+
+	// Создаём Recorder для записи HTTP-ответа.
+	rr := httptest.NewRecorder()
+
+	// Вызываем обработчик.
+	mh.GetMetricValueByName(rr, req)
+
+	// Выводим статусный код и тело ответа.
+	fmt.Println("Status Code:", rr.Code)
+	fmt.Println("Body:", rr.Body.String())
+
+	// Output:
+	// Status Code: 200
+	// Body: 12345.67
+}

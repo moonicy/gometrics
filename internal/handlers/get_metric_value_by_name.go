@@ -12,6 +12,9 @@ import (
 	"github.com/moonicy/gometrics/pkg/floattostr"
 )
 
+// GetMetricValueByName обрабатывает HTTP-запрос для получения значения метрики по её имени и типу.
+// Он извлекает параметры из URL и возвращает значение метрики клиенту.
+// В случае ошибки возвращает соответствующий HTTP-статус и сообщение об ошибке.
 func (mh *MetricsHandler) GetMetricValueByName(res http.ResponseWriter, req *http.Request) {
 	name := chi.URLParam(req, metrics.MName)
 	tp := chi.URLParam(req, metrics.MType)

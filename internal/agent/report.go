@@ -5,6 +5,7 @@ import (
 	"sync/atomic"
 )
 
+// Константы, представляющие названия метрик, используемые агентом.
 const (
 	Alloc          = "Alloc"
 	BuckHashSys    = "BuckHashSys"
@@ -42,13 +43,15 @@ const (
 	CPUutilization = "CPUutilization"
 )
 
+// Report хранит собранные метрики типа gauge и counter.
 type Report struct {
-	Gauge        sync.Map
-	Counter      sync.Map
-	gaugeCount   int
-	counterCount int
+	Gauge        sync.Map // Map для хранения gauge-метрик.
+	Counter      sync.Map // Map для хранения counter-метрик.
+	gaugeCount   int      // Количество gauge-метрик.
+	counterCount int      // Количество counter-метрик.
 }
 
+// NewReport создаёт и возвращает новый экземпляр Report с инициализированными Map.
 func NewReport() *Report {
 	return &Report{
 		Gauge:   sync.Map{},
@@ -56,15 +59,19 @@ func NewReport() *Report {
 	}
 }
 
+// GetCommonCount возвращает общее количество собранных метрик.
 func (r *Report) GetCommonCount() int {
 	return r.gaugeCount + r.counterCount
 }
 
+// SetGauge сохраняет gauge-метрику с указанным именем и значением.
 func (r *Report) SetGauge(name string, value float64) {
 	r.Gauge.Store(name, value)
 	r.gaugeCount++
 }
 
+// AddCounter увеличивает counter-метрику с указанным именем на заданное значение.
+// Если метрика не существует, она инициализируется.
 func (r *Report) AddCounter(name string, value int64) {
 	if v, ok := r.Counter.Load(name); ok {
 		ptr := v.(*int64)

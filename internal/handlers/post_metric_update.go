@@ -10,6 +10,9 @@ import (
 	"github.com/moonicy/gometrics/internal/metrics"
 )
 
+// PostMetricUpdate обрабатывает HTTP-запрос для обновления значения метрики.
+// Получает имя метрики, тип и значение из параметров URL и обновляет хранилище метрик.
+// В случае ошибки возвращает соответствующий HTTP-статус и сообщение об ошибке.
 func (mh *MetricsHandler) PostMetricUpdate(res http.ResponseWriter, req *http.Request) {
 	name := chi.URLParam(req, metrics.MName)
 	val := chi.URLParam(req, metrics.MValue)

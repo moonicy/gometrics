@@ -9,6 +9,9 @@ import (
 	"github.com/moonicy/gometrics/internal/metrics"
 )
 
+// PostMetricsUpdatesJSON обрабатывает HTTP-запрос для обновления значений метрик.
+// Получает имена метрик, типы и значения из json и обновляет хранилище метрик.
+// В случае ошибки возвращает соответствующий HTTP-статус и сообщение об ошибке.
 func (mh *MetricsHandler) PostMetricsUpdatesJSON(res http.ResponseWriter, req *http.Request) {
 	var mt []metrics.Metric
 

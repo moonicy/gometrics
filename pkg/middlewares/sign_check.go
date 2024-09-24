@@ -39,6 +39,10 @@ func (srw *signResponseWriter) GetHashSum() string {
 	return hex.EncodeToString(srw.hash.Sum(nil))
 }
 
+// SignCheckMiddleware возвращает middleware, который проверяет хэш подписи запроса и добавляет подпись к ответу.
+// Он использует переданный ключ для вычисления SHA256-хэша тела запроса и сравнивает его с хэшем из заголовка "HashSHA256".
+// Если хэши не совпадают, возвращает HTTP 400 Bad Request.
+// В ответ добавляет заголовок "HashSHA256" с хэшем тела ответа.
 func SignCheckMiddleware(key string) func(http.Handler) http.Handler {
 	return func(handler http.Handler) http.Handler {
 		return http.HandlerFunc(func(res http.ResponseWriter, req *http.Request) {

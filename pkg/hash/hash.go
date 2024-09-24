@@ -1,3 +1,4 @@
+// Package hash предоставляет функцию для вычисления SHA256-хэша с использованием заданного ключа.
 package hash
 
 import (
@@ -5,6 +6,8 @@ import (
 	"encoding/hex"
 )
 
+// CalcHash вычисляет SHA256-хэш от переданных данных и ключа.
+// Возвращает хэш в виде шестнадцатеречной строки.
 func CalcHash(body []byte, key string) string {
 	sha := sha256.New()
 	sha.Write([]byte(key))

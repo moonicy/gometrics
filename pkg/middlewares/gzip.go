@@ -7,6 +7,8 @@ import (
 	"github.com/moonicy/gometrics/pkg/gzip"
 )
 
+// GzipMiddleware возвращает middleware, который обрабатывает сжатие и декомпрессию HTTP-запросов и ответов с использованием gzip.
+// Он проверяет заголовки запроса и при необходимости сжимает или декомпрессирует данные, устанавливая соответствующие заголовки.
 func GzipMiddleware(h http.Handler) http.Handler {
 	return http.HandlerFunc(func(res http.ResponseWriter, req *http.Request) {
 		ow := res

@@ -9,6 +9,9 @@ import (
 	"github.com/moonicy/gometrics/pkg/workerpool"
 )
 
+// RunSendReport запускает горутину для периодической отправки отчета с метриками на сервер.
+// Она использует пул воркеров для управления количеством одновременных задач и ограничивает скорость отправки.
+// При завершении возвращает функцию, которую можно вызвать для корректного закрытия пула воркеров.
 func RunSendReport(cfg config.AgentConfig, client *client.Client, mem *agent.Report, callback func()) func() {
 	var reportInterval = time.Duration(cfg.ReportInterval) * time.Second
 
