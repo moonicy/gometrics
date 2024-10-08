@@ -125,7 +125,12 @@ func (fs *FileStorage) uploadToFile(ctx context.Context) error {
 	if err != nil {
 		return err
 	}
-	defer fs.producer.Close()
+	defer func(producer Producer) {
+		err = producer.Close()
+		if err != nil {
+			log.Fatal(err)
+		}
+	}(fs.producer)
 
 	err = fs.producer.WriteEvent(event)
 	if err != nil {

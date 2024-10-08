@@ -3,6 +3,7 @@ package handlers
 import (
 	"context"
 	"fmt"
+	"log"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -46,7 +47,11 @@ func TestUpdateMetrics_updateMetrics(t *testing.T) {
 			r.ServeHTTP(rec, req)
 
 			resp := rec.Result()
-			defer resp.Body.Close()
+			defer func() {
+				if err = resp.Body.Close(); err != nil {
+					log.Fatal(err)
+				}
+			}()
 			if resp.StatusCode != tt.status {
 				t.Errorf("expected status %d, got %d", tt.status, resp.StatusCode)
 			}

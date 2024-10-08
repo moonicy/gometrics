@@ -1,6 +1,7 @@
 package gzip
 
 import (
+	"log"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -41,11 +42,21 @@ func TestCompressWriter_Header(t *testing.T) {
 			header.Set(tc.headerKey, tc.headerValue)
 
 			cw.WriteHeader(http.StatusOK)
-			cw.Write([]byte("Test"))
-			cw.Close()
+			_, err := cw.Write([]byte("Test"))
+			if err != nil {
+				log.Fatal(err)
+			}
+			err = cw.Close()
+			if err != nil {
+				log.Fatal(err)
+			}
 
 			result := responseRecorder.Result()
-			defer result.Body.Close()
+			defer func() {
+				if err = result.Body.Close(); err != nil {
+					log.Fatal(err)
+				}
+			}()
 
 			assert.Equal(t, tc.expectedValue, result.Header.Get(tc.expectedKey))
 		})
@@ -84,16 +95,28 @@ func TestCompressWriter_WriteHeader(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			responseRecorder := httptest.NewRecorder()
 			cw := NewCompressWriter(responseRecorder)
-			defer cw.Close()
+			defer func(cw *CompressWriter) {
+				err := cw.Close()
+				if err != nil {
+					log.Fatal(err)
+				}
+			}(cw)
 
 			cw.WriteHeader(tc.statusCode)
-			cw.Write([]byte("Test"))
+			_, err := cw.Write([]byte("Test"))
+			if err != nil {
+				log.Fatal(err)
+			}
 
-			err := cw.Close()
+			err = cw.Close()
 			assert.NoError(t, err)
 
 			result := responseRecorder.Result()
-			defer result.Body.Close()
+			defer func() {
+				if err = result.Body.Close(); err != nil {
+					log.Fatal(err)
+				}
+			}()
 
 			assert.Equal(t, tc.expectedHeader, result.Header.Get("Content-Encoding"))
 			assert.Equal(t, tc.statusCode, result.StatusCode)

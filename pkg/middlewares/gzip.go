@@ -1,6 +1,7 @@
 package middlewares
 
 import (
+	"log"
 	"net/http"
 	"strings"
 
@@ -23,7 +24,12 @@ func GzipMiddleware(h http.Handler) http.Handler {
 
 				cw := gzip.NewCompressWriter(res)
 				ow = cw
-				defer cw.Close()
+				defer func(cw *gzip.CompressWriter) {
+					err := cw.Close()
+					if err != nil {
+						log.Fatal(err)
+					}
+				}(cw)
 			}
 		}
 
@@ -36,7 +42,12 @@ func GzipMiddleware(h http.Handler) http.Handler {
 				return
 			}
 			req.Body = cr
-			defer cr.Close()
+			defer func(cr *gzip.CompressReader) {
+				err = cr.Close()
+				if err != nil {
+					log.Fatal(err)
+				}
+			}(cr)
 		}
 
 		h.ServeHTTP(ow, req)

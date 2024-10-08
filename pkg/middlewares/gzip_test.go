@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"compress/gzip"
 	"io"
+	"log"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -13,7 +14,10 @@ import (
 
 func TestGzipMiddleware(t *testing.T) {
 	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte("Hello, world!"))
+		_, err := w.Write([]byte("Hello, world!"))
+		if err != nil {
+			log.Fatal(err)
+		}
 	})
 
 	tests := []struct {
@@ -62,7 +66,10 @@ func TestGzipMiddleware(t *testing.T) {
 				var body bytes.Buffer
 				gw := gzip.NewWriter(&body)
 				_, _ = gw.Write([]byte(tc.expectedBody))
-				gw.Close()
+				err := gw.Close()
+				if err != nil {
+					log.Fatal(err)
+				}
 				req.Body = io.NopCloser(&body)
 				req.Header.Set("Content-Encoding", tc.contentEncoding)
 			}
@@ -73,7 +80,11 @@ func TestGzipMiddleware(t *testing.T) {
 			middleware.ServeHTTP(w, req)
 
 			res := w.Result()
-			defer res.Body.Close()
+			defer func() {
+				if err := res.Body.Close(); err != nil {
+					log.Fatal(err)
+				}
+			}()
 
 			if tc.expectedHeader != "" {
 				assert.Equal(t, tc.expectedHeader, res.Header.Get("Content-Encoding"))

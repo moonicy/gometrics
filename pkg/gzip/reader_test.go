@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"compress/gzip"
 	"io"
+	"log"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -26,7 +27,10 @@ func TestCompressReader_Close(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to write gzip data: %v", err)
 	}
-	gw.Close()
+	err = gw.Close()
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	mockRC := &mockReadCloser{Reader: &buf}
 
@@ -52,13 +56,21 @@ func TestCompressReader_Read(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to write gzip data: %v", err)
 	}
-	gw.Close()
+	err = gw.Close()
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	cr, err := NewCompressReader(io.NopCloser(&buf))
 	if err != nil {
 		t.Fatalf("Failed to create CompressReader: %v", err)
 	}
-	defer cr.Close()
+	defer func(cr *CompressReader) {
+		err = cr.Close()
+		if err != nil {
+			log.Fatal(err)
+		}
+	}(cr)
 
 	decompressedData, err := io.ReadAll(cr)
 	if err != nil {

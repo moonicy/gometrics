@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"log"
 	"strconv"
 
 	"github.com/jackc/pgerrcode"
@@ -111,7 +112,12 @@ func (dbs *DBStorage) GetMetrics(ctx context.Context) (map[string]int64, map[str
 	if err != nil {
 		return nil, nil, err
 	}
-	defer rowsGauge.Close()
+	defer func(rowsGauge *sql.Rows) {
+		err = rowsGauge.Close()
+		if err != nil {
+			log.Fatal(err)
+		}
+	}(rowsGauge)
 
 	gauge := make(map[string]float64)
 
@@ -135,7 +141,12 @@ func (dbs *DBStorage) GetMetrics(ctx context.Context) (map[string]int64, map[str
 	if err != nil {
 		return nil, nil, err
 	}
-	defer rowsCounter.Close()
+	defer func(rowsCounter *sql.Rows) {
+		err = rowsCounter.Close()
+		if err != nil {
+			log.Fatal(err)
+		}
+	}(rowsCounter)
 
 	counter := make(map[string]int64)
 
@@ -162,18 +173,27 @@ func (dbs *DBStorage) GetMetrics(ctx context.Context) (map[string]int64, map[str
 func (dbs *DBStorage) SetMetrics(ctx context.Context, counter map[string]int64, gauge map[string]float64) error {
 	tx, err := dbs.db.Begin()
 	if err != nil {
-		tx.Rollback()
+		err = tx.Rollback()
+		if err != nil {
+			return err
+		}
 		return err
 	}
 
 	err = dbs.setCounters(ctx, tx, counter)
 	if err != nil {
-		tx.Rollback()
+		err = tx.Rollback()
+		if err != nil {
+			return err
+		}
 		return err
 	}
 	err = dbs.setGauges(ctx, tx, gauge)
 	if err != nil {
-		tx.Rollback()
+		err = tx.Rollback()
+		if err != nil {
+			return err
+		}
 		return err
 	}
 	return tx.Commit()
@@ -197,7 +217,12 @@ func (dbs *DBStorage) setCounters(ctx context.Context, tx *sql.Tx, counter map[s
 	if err != nil {
 		return err
 	}
-	defer stmt.Close()
+	defer func(stmt *sql.Stmt) {
+		err = stmt.Close()
+		if err != nil {
+			log.Fatal(err)
+		}
+	}(stmt)
 
 	_, err = stmt.ExecContext(ctx, vals...)
 	if err != nil {
@@ -224,7 +249,12 @@ func (dbs *DBStorage) setGauges(ctx context.Context, tx *sql.Tx, gauge map[strin
 	if err != nil {
 		return err
 	}
-	defer stmt.Close()
+	defer func(stmt *sql.Stmt) {
+		err = stmt.Close()
+		if err != nil {
+			log.Fatal(err)
+		}
+	}(stmt)
 
 	_, err = stmt.ExecContext(ctx, vals...)
 	if err != nil {

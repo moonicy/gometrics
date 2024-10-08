@@ -38,33 +38,33 @@ func (mh *MetricsHandler) PostMetricUpdateJSON(res http.ResponseWriter, req *htt
 	var delta *int64
 	switch mt.MType {
 	case metrics.Gauge:
-		err := mh.storage.SetGauge(req.Context(), mt.ID, *mt.Value)
+		err = mh.storage.SetGauge(req.Context(), mt.ID, *mt.Value)
 		if err != nil {
 			http.Error(res, err.Error(), http.StatusInternalServerError)
 			return
 		}
-		gv, err := mh.storage.GetGauge(req.Context(), mt.ID)
-		if err != nil {
-			if errors.Is(err, metrics.ErrNotFound) {
+		gv, erro := mh.storage.GetGauge(req.Context(), mt.ID)
+		if erro != nil {
+			if errors.Is(erro, metrics.ErrNotFound) {
 				break
 			}
-			http.Error(res, err.Error(), http.StatusInternalServerError)
+			http.Error(res, erro.Error(), http.StatusInternalServerError)
 			return
 		}
 		value = &gv
 		fmt.Printf("%s\t%s\t%f\n", mt.ID, mt.MType, *mt.Value)
 	case metrics.Counter:
-		err := mh.storage.AddCounter(req.Context(), mt.ID, *mt.Delta)
+		err = mh.storage.AddCounter(req.Context(), mt.ID, *mt.Delta)
 		if err != nil {
 			http.Error(res, err.Error(), http.StatusInternalServerError)
 			return
 		}
-		cv, err := mh.storage.GetCounter(req.Context(), mt.ID)
-		if err != nil {
-			if errors.Is(err, metrics.ErrNotFound) {
+		cv, erro := mh.storage.GetCounter(req.Context(), mt.ID)
+		if erro != nil {
+			if errors.Is(erro, metrics.ErrNotFound) {
 				break
 			}
-			http.Error(res, err.Error(), http.StatusInternalServerError)
+			http.Error(res, erro.Error(), http.StatusInternalServerError)
 			return
 		}
 		delta = &cv
@@ -76,5 +76,8 @@ func (mh *MetricsHandler) PostMetricUpdateJSON(res http.ResponseWriter, req *htt
 	if err != nil {
 		log.Fatal(err)
 	}
-	res.Write(out)
+	_, err = res.Write(out)
+	if err != nil {
+		log.Fatal(err)
+	}
 }
