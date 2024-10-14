@@ -96,7 +96,7 @@ func main() {
 
 	go func() {
 		defer wg.Done()
-		err := server.ListenAndServe()
+		err = server.ListenAndServe()
 		if err != nil && !errors.Is(err, http.ErrServerClosed) {
 			sugar.Fatalw(err.Error(), "event", "start server")
 		}
@@ -109,7 +109,7 @@ func main() {
 	ctxShutdown, cancelShutdown := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancelShutdown()
 
-	if err := server.Shutdown(ctxShutdown); err != nil {
+	if err = server.Shutdown(ctxShutdown); err != nil {
 		sugar.Fatalw("Server shutdown error", "error", err)
 	}
 
