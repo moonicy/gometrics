@@ -39,7 +39,7 @@ func main() {
 	cfg.Host = config.ParseURI(cfg.Host)
 
 	mem := agent.NewReport()
-	client := metricsClient.NewClient(cfg.Host, cfg.HashKey)
+	client := metricsClient.NewClient(cfg.Host, cfg.HashKey, cfg.CryptoKey)
 	reader := agent.NewMetricsReader()
 	var wg sync.WaitGroup
 	wg.Add(2)
