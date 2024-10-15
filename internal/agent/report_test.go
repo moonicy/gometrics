@@ -36,15 +36,16 @@ func TestSetGauge(t *testing.T) {
 }
 
 func TestAddCounter_NewCounter(t *testing.T) {
+	var initialValue int64 = 10
 	report := NewReport()
-	report.AddCounter(Mallocs, 10)
+	report.AddCounter(Mallocs, initialValue)
 
 	val, ok := report.Counter.Load(Mallocs)
 	if !ok {
 		t.Fatalf("Expected to find counter %s", Mallocs)
 	}
 
-	if v := val.(int64); v != 10 {
+	if v := val.(*int64); *v != initialValue {
 		t.Errorf("Expected value 10, got %d", v)
 	}
 

@@ -77,7 +77,7 @@ func (r *Report) AddCounter(name string, value int64) {
 		ptr := v.(*int64)
 		atomic.AddInt64(ptr, value)
 	} else {
-		r.Counter.Store(name, value)
+		r.Counter.Store(name, &value)
 		r.counterCount++
 	}
 }

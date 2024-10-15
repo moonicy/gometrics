@@ -3,7 +3,9 @@ package database
 
 import (
 	"context"
+	"database/sql"
 	"errors"
+	"log"
 	"testing"
 
 	"github.com/DATA-DOG/go-sqlmock"
@@ -39,7 +41,7 @@ func TestRetryableDB_Ping_Success(t *testing.T) {
 		t.Errorf("Ожидали успешный Ping, получили ошибку: %v", err)
 	}
 
-	if err := mock.ExpectationsWereMet(); err != nil {
+	if err = mock.ExpectationsWereMet(); err != nil {
 		t.Errorf("Ожидания не были выполнены: %v", err)
 	}
 }
@@ -62,7 +64,7 @@ func TestRetryableDB_ExecContext_Success(t *testing.T) {
 		t.Errorf("Ожидали валидный sql.Result, получили nil")
 	}
 
-	if err := mock.ExpectationsWereMet(); err != nil {
+	if err = mock.ExpectationsWereMet(); err != nil {
 		t.Errorf("Ожидания не были выполнены: %v", err)
 	}
 }
@@ -89,7 +91,7 @@ func TestRetryableDB_ExecContext_NonRetryableError(t *testing.T) {
 		t.Errorf("Ожидали sql.Result равным nil, получили %v", result)
 	}
 
-	if err := mock.ExpectationsWereMet(); err != nil {
+	if err = mock.ExpectationsWereMet(); err != nil {
 		t.Errorf("Ожидания не были выполнены: %v", err)
 	}
 }
@@ -116,7 +118,12 @@ func TestRetryableDB_QueryContext_Success(t *testing.T) {
 	if resultRows.Err() != nil {
 		t.Errorf("Ожидали успешный QueryContext, получили ошибку в Rows: %v", resultRows.Err())
 	}
-	defer resultRows.Close()
+	defer func(resultRows *sql.Rows) {
+		err = resultRows.Close()
+		if err != nil {
+			log.Fatal(err)
+		}
+	}(resultRows)
 
 	if err = mock.ExpectationsWereMet(); err != nil {
 		t.Errorf("Ожидания не были выполнены: %v", err)

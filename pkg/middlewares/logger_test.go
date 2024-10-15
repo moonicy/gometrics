@@ -24,7 +24,7 @@ func TestWithLogging(t *testing.T) {
 		}
 	})
 
-	loggingMiddleware := WithLogging(*logger)(handler)
+	loggingMiddleware := WithLogging(logger)(handler)
 
 	req := httptest.NewRequest(http.MethodGet, "/test", nil)
 	rec := httptest.NewRecorder()

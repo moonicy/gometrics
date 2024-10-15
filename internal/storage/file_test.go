@@ -3,6 +3,7 @@ package storage
 import (
 	"context"
 	"errors"
+	"log"
 	"testing"
 	"time"
 
@@ -273,7 +274,7 @@ func TestFileStorage_SetMetrics(t *testing.T) {
 }
 
 func TestFileStorage_Init_Restore(t *testing.T) {
-	ctx, cancel := context.WithCancel(context.Background())
+	ctxt, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
 	cfg := config.ServerConfig{
@@ -299,15 +300,15 @@ func TestFileStorage_Init_Restore(t *testing.T) {
 		cfg:      cfg,
 	}
 
-	err := fs.Init(ctx)
+	err := fs.Init(ctxt)
 	if err != nil {
 		t.Fatalf("Init returned error: %v", err)
 	}
 
-	if val, _ := fs.mem.GetGauge(ctx, "cpu"); val != 0.80 {
+	if val, _ := fs.mem.GetGauge(ctxt, "cpu"); val != 0.80 {
 		t.Errorf("Expected gauge 'cpu' to be 0.80 after Restore, got %v", val)
 	}
-	if val, _ := fs.mem.GetCounter(ctx, "requests"); val != 50 {
+	if val, _ := fs.mem.GetCounter(ctxt, "requests"); val != 50 {
 		t.Errorf("Expected counter 'requests' to be 50 after Restore, got %v", val)
 	}
 }
@@ -370,7 +371,7 @@ func TestFileStorage_uploadToFile_ErrorOnProducerOpen(t *testing.T) {
 }
 
 func TestFileStorage_WaitShutDown(t *testing.T) {
-	ctx, cancel := context.WithCancel(context.Background())
+	ctxt, cancel := context.WithCancel(context.Background())
 
 	cfg := config.ServerConfig{
 		StoreInternal: 0,
@@ -387,7 +388,12 @@ func TestFileStorage_WaitShutDown(t *testing.T) {
 		cfg:      cfg,
 	}
 
-	go fs.Init(ctx)
+	go func() {
+		err := fs.Init(ctxt)
+		if err != nil {
+			log.Fatal(err)
+		}
+	}()
 
 	cancel()
 

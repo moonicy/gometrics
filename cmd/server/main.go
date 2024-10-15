@@ -4,6 +4,8 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"go.uber.org/zap"
+	"log"
 	"net/http"
 	"net/http/pprof"
 	"os"
@@ -46,9 +48,16 @@ func main() {
 	cfg := config.NewServerConfig()
 
 	sugar := logger.NewLogger()
+	defer func(logger *zap.SugaredLogger) {
+		err := logger.Sync()
+		if err != nil {
+			log.Fatal(err)
+		}
+	}(sugar)
+
 	ctx, cancel := context.WithCancel(context.Background())
 
-	database, closeFn, err := database2.NewDatabase(&sugar, cfg)
+	database, closeFn, err := database2.NewDatabase(sugar, cfg)
 	if err != nil {
 		sugar.Error(err)
 	}
@@ -66,7 +75,7 @@ func main() {
 		sugar.Error(err)
 	}
 
-	metricsHandler := handlers.NewMetricsHandler(storage, database, &sugar)
+	metricsHandler := handlers.NewMetricsHandler(storage, database, sugar)
 
 	route := handlers.NewRoute(metricsHandler, sugar, cfg)
 

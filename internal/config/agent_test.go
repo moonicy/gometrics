@@ -39,17 +39,47 @@ func TestNewAgentConfig_Flags(t *testing.T) {
 func TestNewAgentConfig_EnvVars(t *testing.T) {
 	resetFlags()
 
-	os.Setenv("ADDRESS", "192.168.1.1:8081")
-	os.Setenv("KEY", "envhashkey")
-	os.Setenv("REPORT_INTERVAL", "180")
-	os.Setenv("POLL_INTERVAL", "30")
-	os.Setenv("RATE_LIMIT", "15")
+	err := os.Setenv("ADDRESS", "192.168.1.1:8081")
+	if err != nil {
+		t.Errorf("Failed to set environment variable ADDRESS: %v", err)
+	}
+	err = os.Setenv("KEY", "envhashkey")
+	if err != nil {
+		t.Errorf("Failed to set environment variable KEY: %v", err)
+	}
+	err = os.Setenv("REPORT_INTERVAL", "180")
+	if err != nil {
+		t.Errorf("Failed to set environment variable REPORT_INTERVAL: %v", err)
+	}
+	err = os.Setenv("POLL_INTERVAL", "30")
+	if err != nil {
+		t.Errorf("Failed to set environment variable POLL_INTERVAL: %v", err)
+	}
+	err = os.Setenv("RATE_LIMIT", "15")
+	if err != nil {
+		t.Errorf("Failed to set environment variable RATE_LIMIT: %v", err)
+	}
 	defer func() {
-		os.Unsetenv("ADDRESS")
-		os.Unsetenv("KEY")
-		os.Unsetenv("REPORT_INTERVAL")
-		os.Unsetenv("POLL_INTERVAL")
-		os.Unsetenv("RATE_LIMIT")
+		err = os.Unsetenv("ADDRESS")
+		if err != nil {
+			t.Errorf("Failed to delete environment variable ADDRESS: %v", err)
+		}
+		err = os.Unsetenv("KEY")
+		if err != nil {
+			t.Errorf("Failed to delete environment variable KEY: %v", err)
+		}
+		err = os.Unsetenv("REPORT_INTERVAL")
+		if err != nil {
+			t.Errorf("Failed to delete environment variable REPORT_INTERVAL: %v", err)
+		}
+		err = os.Unsetenv("POLL_INTERVAL")
+		if err != nil {
+			t.Errorf("Failed to delete environment variable POLL_INTERVAL: %v", err)
+		}
+		err = os.Unsetenv("RATE_LIMIT")
+		if err != nil {
+			t.Errorf("Failed to delete environment variable RATE_LIMIT: %v", err)
+		}
 	}()
 
 	ac := NewAgentConfig()

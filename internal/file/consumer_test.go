@@ -25,7 +25,12 @@ func TestConsumer_Open_Success(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create temp file: %v", err)
 	}
-	defer os.Remove(tmpfile.Name())
+	defer func(name string) {
+		err = os.Remove(name)
+		if err != nil {
+			t.Fatalf("Failed to remove temp file: %v", err)
+		}
+	}(tmpfile.Name())
 
 	consumer := NewConsumer(tmpfile.Name())
 	err = consumer.Open()
@@ -54,16 +59,29 @@ func TestConsumer_ReadEvent_InvalidJSON(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create temp file: %v", err)
 	}
-	defer os.Remove(tmpfile.Name())
+	defer func(name string) {
+		err = os.Remove(name)
+		if err != nil {
+			t.Errorf("Failed to remove temp file: %v", err)
+		}
+	}(tmpfile.Name())
 
-	tmpfile.WriteString("invalid_json\n")
+	_, err = tmpfile.WriteString("invalid_json\n")
+	if err != nil {
+		t.Errorf("Failed to write to temp file: %v", err)
+	}
 
 	consumer := NewConsumer(tmpfile.Name())
 	err = consumer.Open()
 	if err != nil {
 		t.Fatalf("Failed to open consumer: %v", err)
 	}
-	defer consumer.Close()
+	defer func(consumer *Consumer) {
+		err = consumer.Close()
+		if err != nil {
+			t.Fatalf("Failed to close consumer: %v", err)
+		}
+	}(consumer)
 
 	_, err = consumer.ReadEvent()
 	if err == nil {

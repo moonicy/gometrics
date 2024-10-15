@@ -95,13 +95,13 @@ func (cl *Client) SendReport(report *agent.Report) {
 func (cl *Client) makeRequestData(report *agent.Report) ([]byte, error) {
 	metrics := make([]m.Metric, 0, report.GetCommonCount())
 	report.Counter.Range(func(key, value any) bool {
-		v := value.(int64)
+		v := value.(*int64)
 		metrics = append(metrics, m.Metric{
 			MetricName: m.MetricName{
 				ID:    key.(string),
 				MType: m.Counter,
 			},
-			Delta: &v,
+			Delta: v,
 			Value: nil,
 		})
 		return true

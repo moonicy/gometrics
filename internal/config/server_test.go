@@ -14,19 +14,55 @@ func TestNewServerConfig_WithEnvVars(t *testing.T) {
 	resetFlags()
 	os.Clearenv()
 
-	os.Setenv("ADDRESS", "192.168.1.1:8081")
-	os.Setenv("STORE_INTERVAL", "900")
-	os.Setenv("FILE_STORAGE_PATH", "/var/data")
-	os.Setenv("DATABASE_DSN", "user:pass@/prod_db")
-	os.Setenv("KEY", "envsecret")
-	os.Setenv("RESTORE", "false")
+	err := os.Setenv("ADDRESS", "192.168.1.1:8081")
+	if err != nil {
+		t.Errorf("Failed to set environment variable ADDRESS: %v", err)
+	}
+	err = os.Setenv("STORE_INTERVAL", "900")
+	if err != nil {
+		t.Errorf("Failed to set environment variable STORE_INTERVAL: %v", err)
+	}
+	err = os.Setenv("FILE_STORAGE_PATH", "/var/data")
+	if err != nil {
+		t.Errorf("Failed to set environment variable FILE_STORAGE_PATH: %v", err)
+	}
+	err = os.Setenv("DATABASE_DSN", "user:pass@/prod_db")
+	if err != nil {
+		t.Errorf("Failed to set environment variable DATABASE_DSN: %v", err)
+	}
+	err = os.Setenv("KEY", "envsecret")
+	if err != nil {
+		t.Errorf("Failed to set environment variable KEY: %v", err)
+	}
+	err = os.Setenv("RESTORE", "false")
+	if err != nil {
+		t.Errorf("Failed to set environment variable RESTORE: %v", err)
+	}
 	defer func() {
-		os.Unsetenv("ADDRESS")
-		os.Unsetenv("STORE_INTERVAL")
-		os.Unsetenv("FILE_STORAGE_PATH")
-		os.Unsetenv("DATABASE_DSN")
-		os.Unsetenv("KEY")
-		os.Unsetenv("RESTORE")
+		err = os.Unsetenv("ADDRESS")
+		if err != nil {
+			t.Errorf("Failed to delete environment variable ADDRESS: %v", err)
+		}
+		err = os.Unsetenv("STORE_INTERVAL")
+		if err != nil {
+			t.Errorf("Failed to delete environment variable STORE_INTERVAL: %v", err)
+		}
+		err = os.Unsetenv("FILE_STORAGE_PATH")
+		if err != nil {
+			t.Errorf("Failed to delete environment variable FILE_STORAGE_PATH: %v", err)
+		}
+		err = os.Unsetenv("DATABASE_DSN")
+		if err != nil {
+			t.Errorf("Failed to delete environment variable DATABASE_DSN: %v", err)
+		}
+		err = os.Unsetenv("KEY")
+		if err != nil {
+			t.Errorf("Failed to delete environment variable KEY: %v", err)
+		}
+		err = os.Unsetenv("RESTORE")
+		if err != nil {
+			t.Errorf("Failed to delete environment variable RESTORE: %v", err)
+		}
 	}()
 
 	sc := NewServerConfig()
@@ -55,8 +91,14 @@ func TestNewServerConfig_FlagsAndEnvVars(t *testing.T) {
 	resetFlags()
 	os.Clearenv()
 
-	os.Setenv("ADDRESS", "192.168.1.1:8081")
-	os.Setenv("STORE_INTERVAL", "900")
+	err := os.Setenv("ADDRESS", "192.168.1.1:8081")
+	if err != nil {
+		t.Errorf("Failed to set environment variable ADDRESS: %v", err)
+	}
+	err = os.Setenv("STORE_INTERVAL", "900")
+	if err != nil {
+		t.Errorf("Failed to set environment variable STORE_INTERVAL: %v", err)
+	}
 
 	os.Args = []string{
 		"cmd",
@@ -90,11 +132,23 @@ func TestNewServerConfig_InvalidEnvVars(t *testing.T) {
 	resetFlags()
 	os.Clearenv()
 
-	os.Setenv("STORE_INTERVAL", "invalid")
-	os.Setenv("RESTORE", "invalid")
+	err := os.Setenv("STORE_INTERVAL", "invalid")
+	if err != nil {
+		t.Errorf("Failed to set environment variable STORE_INTERVAL: %v", err)
+	}
+	err = os.Setenv("RESTORE", "invalid")
+	if err != nil {
+		t.Errorf("Failed to set environment variable RESTORE: %v", err)
+	}
 	defer func() {
-		os.Unsetenv("STORE_INTERVAL")
-		os.Unsetenv("RESTORE")
+		err = os.Unsetenv("STORE_INTERVAL")
+		if err != nil {
+			t.Errorf("Failed to delete environment variable STORE_INTERVAL: %v", err)
+		}
+		err = os.Unsetenv("RESTORE")
+		if err != nil {
+			t.Errorf("Failed to delete environment variable RESTORE: %v", err)
+		}
 	}()
 
 	sc := NewServerConfig()

@@ -3,6 +3,7 @@ package file
 import (
 	"bufio"
 	"encoding/json"
+	"log"
 	"os"
 	"testing"
 )
@@ -27,7 +28,12 @@ func TestProducer_Open_Success(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create temp file: %v", err)
 	}
-	defer os.Remove(tmpfile.Name())
+	defer func(name string) {
+		err = os.Remove(name)
+		if err != nil {
+			log.Printf("Failed to remove temp file: %v", err)
+		}
+	}(tmpfile.Name())
 
 	producer := NewProducer(tmpfile.Name())
 	err = producer.Open()
@@ -56,14 +62,24 @@ func TestProducer_WriteEvent_Success(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create temp file: %v", err)
 	}
-	defer os.Remove(tmpfile.Name())
+	defer func(name string) {
+		err = os.Remove(name)
+		if err != nil {
+			log.Printf("Failed to remove temp file: %v", err)
+		}
+	}(tmpfile.Name())
 
 	producer := NewProducer(tmpfile.Name())
 	err = producer.Open()
 	if err != nil {
 		t.Fatalf("Failed to open producer: %v", err)
 	}
-	defer producer.Close()
+	defer func(producer *Producer) {
+		err = producer.Close()
+		if err != nil {
+			log.Fatalf("Failed to close producer: %v", err)
+		}
+	}(producer)
 
 	event := &Event{
 		Gauge:     map[string]float64{"cpu": 0.85, "memory": 1024.0},
@@ -80,7 +96,12 @@ func TestProducer_WriteEvent_Success(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to open temp file for reading: %v", err)
 	}
-	defer file.Close()
+	defer func(file *os.File) {
+		err = file.Close()
+		if err != nil {
+			log.Printf("Failed to close file: %v", err)
+		}
+	}(file)
 
 	scanner := bufio.NewScanner(file)
 	if !scanner.Scan() {
@@ -107,14 +128,24 @@ func TestProducer_WriteEvent_InvalidJSON(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create temp file: %v", err)
 	}
-	defer os.Remove(tmpfile.Name())
+	defer func(name string) {
+		err = os.Remove(name)
+		if err != nil {
+			log.Printf("Failed to remove temp file: %v", err)
+		}
+	}(tmpfile.Name())
 
 	producer := NewProducer(tmpfile.Name())
 	err = producer.Open()
 	if err != nil {
 		t.Fatalf("Failed to open producer: %v", err)
 	}
-	defer producer.Close()
+	defer func(producer *Producer) {
+		err = producer.Close()
+		if err != nil {
+			log.Fatalf("Failed to close producer: %v", err)
+		}
+	}(producer)
 
 	event := &Event{
 		Gauge:     map[string]float64{"cpu": 0.95},
@@ -131,7 +162,12 @@ func TestProducer_WriteEvent_InvalidJSON(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to open file for corruption: %v", err)
 	}
-	defer file.Close()
+	defer func(file *os.File) {
+		err = file.Close()
+		if err != nil {
+			log.Fatal(err)
+		}
+	}(file)
 
 	_, err = file.WriteAt([]byte("invalid_json"), 0)
 	if err != nil {
@@ -143,7 +179,12 @@ func TestProducer_WriteEvent_InvalidJSON(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to open consumer: %v", err)
 	}
-	defer consumer.Close()
+	defer func(consumer *Consumer) {
+		err = consumer.Close()
+		if err != nil {
+			log.Fatal(err)
+		}
+	}(consumer)
 
 	_, err = consumer.ReadEvent()
 	if err == nil {
