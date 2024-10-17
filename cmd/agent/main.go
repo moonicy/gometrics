@@ -1,6 +1,7 @@
 package main
 
 import (
+	"log"
 	"net/http"
 	_ "net/http/pprof"
 	"sync"
@@ -23,7 +24,10 @@ func main() {
 	wg.Add(2)
 
 	go func() {
-		http.ListenAndServe(":8081", nil)
+		err := http.ListenAndServe(":8081", nil)
+		if err != nil {
+			log.Fatal(err)
+		}
 	}()
 
 	closeReadFn := workerpool.RunReadMetrics(cfg, reader, mem, wg.Done)

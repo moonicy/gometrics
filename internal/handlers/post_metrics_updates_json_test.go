@@ -63,7 +63,11 @@ func TestMetricsHandler_UpdatesJSONMetrics(t *testing.T) {
 			r.ServeHTTP(rec, req)
 
 			resp := rec.Result()
-			defer resp.Body.Close()
+			defer func() {
+				if err = resp.Body.Close(); err != nil {
+					log.Fatal(err)
+				}
+			}()
 			if resp.StatusCode != tt.status {
 				t.Errorf("expected status %d, got %d", tt.status, resp.StatusCode)
 			}

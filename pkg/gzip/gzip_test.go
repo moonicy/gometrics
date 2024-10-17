@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"compress/gzip"
 	"io"
+	"log"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -45,7 +46,12 @@ func TestCompress(t *testing.T) {
 				t.Errorf("Failed to create gzip reader: %v", err)
 				return
 			}
-			defer gzipReader.Close()
+			defer func(gzipReader *gzip.Reader) {
+				err = gzipReader.Close()
+				if err != nil {
+					log.Fatal(err)
+				}
+			}(gzipReader)
 
 			decompressedData, err := io.ReadAll(gzipReader)
 			if err != nil {

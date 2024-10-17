@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"crypto/sha256"
 	"encoding/hex"
+	"log"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -15,7 +16,10 @@ import (
 
 func TestSignCheckMiddleware(t *testing.T) {
 	testHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte("Test response"))
+		_, err := w.Write([]byte("Test response"))
+		if err != nil {
+			log.Fatal(err)
+		}
 	})
 
 	tests := []struct {

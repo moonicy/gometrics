@@ -3,6 +3,7 @@ package storage
 import (
 	"context"
 	"fmt"
+	"log"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -65,7 +66,10 @@ func TestMemStorage_AddCounter(t *testing.T) {
 				gauge:   tt.fields.gauge,
 				counter: tt.fields.counter,
 			}
-			ms.AddCounter(ctx, tt.args.key, tt.args.value)
+			err := ms.AddCounter(ctx, tt.args.key, tt.args.value)
+			if err != nil {
+				log.Fatal(err)
+			}
 
 			got := fmt.Sprintf("%d", ms.counter[tt.args.key])
 			if tt.wait != got {
@@ -121,7 +125,10 @@ func TestMemStorage_SetGauge(t *testing.T) {
 				gauge:   tt.fields.gauge,
 				counter: tt.fields.counter,
 			}
-			ms.SetGauge(ctx, tt.args.key, tt.args.value)
+			err := ms.SetGauge(ctx, tt.args.key, tt.args.value)
+			if err != nil {
+				log.Fatal(err)
+			}
 
 			got := fmt.Sprintf("%f", ms.gauge[tt.args.key])
 			if tt.wait != got {

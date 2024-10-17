@@ -1,6 +1,7 @@
 package middlewares
 
 import (
+	"log"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -17,7 +18,10 @@ func TestWithLogging(t *testing.T) {
 
 	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
-		w.Write([]byte("Hello, test logging!"))
+		_, err := w.Write([]byte("Hello, test logging!"))
+		if err != nil {
+			log.Fatal(err)
+		}
 	})
 
 	loggingMiddleware := WithLogging(*logger)(handler)
@@ -46,7 +50,10 @@ func TestWithLogging(t *testing.T) {
 func Test_loggingResponseWriter_Write(t *testing.T) {
 	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusCreated)
-		w.Write([]byte("Hello, world!"))
+		_, err := w.Write([]byte("Hello, world!"))
+		if err != nil {
+			log.Fatal(err)
+		}
 	})
 
 	req := httptest.NewRequest(http.MethodGet, "/", nil)

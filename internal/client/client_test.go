@@ -2,6 +2,7 @@ package client
 
 import (
 	"io"
+	"log"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -11,7 +12,12 @@ import (
 
 func TestClient_SendReport(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		defer r.Body.Close()
+		defer func(Body io.ReadCloser) {
+			err := Body.Close()
+			if err != nil {
+				log.Fatal(err)
+			}
+		}(r.Body)
 		data, err := io.ReadAll(r.Body)
 		if err != nil {
 			t.Error(err)

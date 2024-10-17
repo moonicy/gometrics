@@ -55,7 +55,10 @@ func (mh *MetricsHandler) GetMetricValueByNameJSON(res http.ResponseWriter, req 
 		if err != nil {
 			log.Fatal(err)
 		}
-		res.Write(out)
+		_, err = res.Write(out)
+		if err != nil {
+			log.Fatal(err)
+		}
 	case metrics.Counter:
 		delta, err := mh.storage.GetCounter(req.Context(), mt.ID)
 		if err != nil {
@@ -71,6 +74,9 @@ func (mh *MetricsHandler) GetMetricValueByNameJSON(res http.ResponseWriter, req 
 		if err != nil {
 			log.Fatal(err)
 		}
-		res.Write(out)
+		_, err = res.Write(out)
+		if err != nil {
+			log.Fatal(err)
+		}
 	}
 }

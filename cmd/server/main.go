@@ -31,7 +31,11 @@ func main() {
 	if err != nil {
 		sugar.Error(err)
 	}
-	defer closeFn()
+	defer func() {
+		if err = closeFn(); err != nil {
+			sugar.Error(err)
+		}
+	}()
 
 	cr := file.NewConsumer(cfg.FileStoragePath)
 	pr := file.NewProducer(cfg.FileStoragePath)

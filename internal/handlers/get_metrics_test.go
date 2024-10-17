@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -23,8 +24,14 @@ func TestMetricsHandler_GetMetrics(t *testing.T) {
 		t.Fatalf("could not create request: %v", err)
 	}
 	mem := storage.NewMemStorage()
-	mem.AddCounter(ctx, agent.Alloc, 22)
-	mem.SetGauge(ctx, agent.Frees, 22)
+	err = mem.AddCounter(ctx, agent.Alloc, 22)
+	if err != nil {
+		log.Fatal(err)
+	}
+	err = mem.SetGauge(ctx, agent.Frees, 22)
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	u := &MetricsHandler{
 		storage: mem,
@@ -36,7 +43,11 @@ func TestMetricsHandler_GetMetrics(t *testing.T) {
 	r.ServeHTTP(rec, req)
 
 	resp := rec.Result()
-	defer resp.Body.Close()
+	defer func() {
+		if err = resp.Body.Close(); err != nil {
+			log.Fatal(err)
+		}
+	}()
 	if resp.StatusCode != http.StatusOK {
 		t.Errorf("expected status %d, got %d", http.StatusOK, resp.StatusCode)
 	}
