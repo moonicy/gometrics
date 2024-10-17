@@ -19,6 +19,8 @@ type AgentConfig struct {
 	HashKey string
 	// RateLimit - количество одновременно исходящих запросов на сервер.
 	RateLimit int
+	// CryptoKey - путь до файла с публичным ключом.
+	CryptoKey string
 }
 
 // NewAgentConfig создаёт и возвращает новый экземпляр AgentConfig, инициализированный с помощью флагов.
@@ -35,6 +37,7 @@ func (ac *AgentConfig) parseFlag() {
 	flag.IntVar(&ac.PollInterval, "p", DefaultPollInterval, "poll interval")
 	flag.StringVar(&ac.HashKey, "k", DefaultHashKey, "hash key")
 	flag.IntVar(&ac.RateLimit, "l", DefaultRateLimit, "rate limit")
+	flag.StringVar(&ac.CryptoKey, "crypto-key", DefaultCryptoKeyAgent, "crypto key")
 	flag.Parse()
 
 	if envRunAddr := os.Getenv("ADDRESS"); envRunAddr != "" {
@@ -60,5 +63,8 @@ func (ac *AgentConfig) parseFlag() {
 		if err != nil {
 			log.Fatal("Invalid RATE_LIMIT")
 		}
+	}
+	if envCryptoKey := os.Getenv("CRYPTO_KEY"); envCryptoKey != "" {
+		ac.CryptoKey = envCryptoKey
 	}
 }

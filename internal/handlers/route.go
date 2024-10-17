@@ -15,6 +15,7 @@ func NewRoute(mh *MetricsHandler, log *zap.SugaredLogger, cfg config.ServerConfi
 	router := chi.NewRouter()
 	router.Route("/", func(r chi.Router) {
 		r.Use(middleware.StripSlashes)
+		r.Use(middlewares.CryptMiddleware("", cfg.CryptoKey))
 		r.Use(middlewares.GzipMiddleware)
 		r.Use(middlewares.WithLogging(log))
 		r.Use(middlewares.SignCheckMiddleware(cfg.HashKey))
