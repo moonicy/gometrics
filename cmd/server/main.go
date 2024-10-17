@@ -3,6 +3,9 @@ package main
 import (
 	"context"
 	"errors"
+	"fmt"
+	"go.uber.org/zap"
+	"log"
 	"net/http"
 	"net/http/pprof"
 	"os"
@@ -21,13 +24,40 @@ import (
 	"github.com/moonicy/gometrics/pkg/logger"
 )
 
+var (
+	buildVersion string
+	buildDate    string
+	buildCommit  string
+)
+
 func main() {
+	if buildVersion == "" {
+		buildVersion = "N/A"
+	}
+	if buildDate == "" {
+		buildDate = "N/A"
+	}
+	if buildCommit == "" {
+		buildCommit = "N/A"
+	}
+
+	fmt.Printf("Build version: %s\n", buildVersion)
+	fmt.Printf("Build date: %s\n", buildDate)
+	fmt.Printf("Build commit: %s\n", buildCommit)
+
 	cfg := config.NewServerConfig()
 
 	sugar := logger.NewLogger()
+	defer func(logger *zap.SugaredLogger) {
+		err := logger.Sync()
+		if err != nil {
+			log.Fatal(err)
+		}
+	}(sugar)
+
 	ctx, cancel := context.WithCancel(context.Background())
 
-	database, closeFn, err := database2.NewDatabase(&sugar, cfg)
+	database, closeFn, err := database2.NewDatabase(sugar, cfg)
 	if err != nil {
 		sugar.Error(err)
 	}
@@ -45,7 +75,7 @@ func main() {
 		sugar.Error(err)
 	}
 
-	metricsHandler := handlers.NewMetricsHandler(storage, database, &sugar)
+	metricsHandler := handlers.NewMetricsHandler(storage, database, sugar)
 
 	route := handlers.NewRoute(metricsHandler, sugar, cfg)
 

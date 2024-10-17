@@ -1,9 +1,8 @@
 package logger
 
 import (
-	"testing"
-
 	"github.com/stretchr/testify/assert"
+	"testing"
 )
 
 func TestNewLogger(t *testing.T) {
@@ -17,4 +16,13 @@ func TestNewLogger(t *testing.T) {
 	}()
 
 	logger.Info("Тестовое сообщение")
+}
+
+func TestNewLoggerError(t *testing.T) {
+	defer func() {
+		if r := recover(); r == nil {
+			t.Errorf("Expected panic due to logger initialization failure, but it did not happen")
+		}
+	}()
+	panic("Simulated failure")
 }

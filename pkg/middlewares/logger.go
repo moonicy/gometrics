@@ -26,7 +26,7 @@ func (lrw *loggingResponseWriter) Write(b []byte) (int, error) {
 
 // WithLogging возвращает middleware, который логирует информацию о каждом HTTP-запросе и ответе.
 // Он записывает URI запроса, метод, длительность обработки, статусный код и размер ответа.
-func WithLogging(sugar zap.SugaredLogger) func(http.Handler) http.Handler {
+func WithLogging(sugar *zap.SugaredLogger) func(http.Handler) http.Handler {
 	return func(handler http.Handler) http.Handler {
 		return http.HandlerFunc(func(res http.ResponseWriter, req *http.Request) {
 			start := time.Now()
