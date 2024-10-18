@@ -20,6 +20,8 @@ type ServerConfig struct {
 	DatabaseDsn string
 	// HashKey - ключ для хеша.
 	HashKey string
+	// CryptoKey - путь до файла с публичным ключом.
+	CryptoKey string
 }
 
 // NewServerConfig создаёт и возвращает новый экземпляр ServerConfig, инициализированный с помощью флагов.
@@ -36,6 +38,7 @@ func (sc *ServerConfig) parseFlag() {
 	flag.BoolVar(&sc.Restore, "r", true, "restore")
 	flag.StringVar(&sc.DatabaseDsn, "d", "", "database dsn")
 	flag.StringVar(&sc.HashKey, "k", "", "hash key")
+	flag.StringVar(&sc.CryptoKey, "crypto-key", DefaultCryptoKeyServer, "crypto key")
 	flag.Parse()
 
 	if envRunAddr := os.Getenv("ADDRESS"); envRunAddr != "" {
@@ -60,5 +63,8 @@ func (sc *ServerConfig) parseFlag() {
 		case "false":
 			sc.Restore = false
 		}
+	}
+	if envCryptoKey := os.Getenv("CRYPTO_KEY"); envCryptoKey != "" {
+		sc.CryptoKey = envCryptoKey
 	}
 }

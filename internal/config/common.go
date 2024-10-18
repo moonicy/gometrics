@@ -2,13 +2,15 @@ package config
 
 import "strings"
 
-// Конфигурация сервера по умолчанию.
+// Конфигурация по умолчанию.
 const (
-	DefaultHost           = "localhost:8080"
-	DefaultReportInterval = 20
-	DefaultPollInterval   = 2
-	DefaultHashKey        = ""
-	DefaultRateLimit      = 0
+	DefaultHost            = "localhost:8080"
+	DefaultReportInterval  = 20
+	DefaultPollInterval    = 2
+	DefaultHashKey         = ""
+	DefaultRateLimit       = 0
+	DefaultCryptoKeyServer = "keys/private.pem"
+	DefaultCryptoKeyAgent  = "keys/public.pem"
 )
 
 // ParseURI возвращает полный URI, добавляя протокол и хост по умолчанию при необходимости.

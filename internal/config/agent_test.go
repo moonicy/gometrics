@@ -15,6 +15,7 @@ func TestNewAgentConfig_Flags(t *testing.T) {
 		"-p", "20",
 		"-k", "testhashkey",
 		"-l", "10",
+		"crypto-key", "keys/public.pem",
 	}
 
 	ac := NewAgentConfig()
@@ -33,6 +34,9 @@ func TestNewAgentConfig_Flags(t *testing.T) {
 	}
 	if ac.RateLimit != 10 {
 		t.Errorf("Expected RateLimit to be %d, got %d", 10, ac.RateLimit)
+	}
+	if ac.CryptoKey != "keys/public.pem" {
+		t.Errorf("Expected CryptoKey to be %s, got %s", "keys/public.pem", ac.CryptoKey)
 	}
 }
 
@@ -59,6 +63,10 @@ func TestNewAgentConfig_EnvVars(t *testing.T) {
 	if err != nil {
 		t.Errorf("Failed to set environment variable RATE_LIMIT: %v", err)
 	}
+	err = os.Setenv("CRYPTO_KEY", "str")
+	if err != nil {
+		t.Errorf("Failed to set environment variable CRYPTO_KEY: %v", err)
+	}
 	defer func() {
 		err = os.Unsetenv("ADDRESS")
 		if err != nil {
@@ -80,6 +88,10 @@ func TestNewAgentConfig_EnvVars(t *testing.T) {
 		if err != nil {
 			t.Errorf("Failed to delete environment variable RATE_LIMIT: %v", err)
 		}
+		err = os.Unsetenv("CRYPTO_KEY")
+		if err != nil {
+			t.Errorf("Failed to delete environment variable CRYPTO_KEY: %v", err)
+		}
 	}()
 
 	ac := NewAgentConfig()
@@ -98,5 +110,8 @@ func TestNewAgentConfig_EnvVars(t *testing.T) {
 	}
 	if ac.RateLimit != 15 {
 		t.Errorf("Expected RateLimit to be %d, got %d", 15, ac.RateLimit)
+	}
+	if ac.CryptoKey != "str" {
+		t.Errorf("Expected CryptoKey to be %s, got %s", "str", ac.CryptoKey)
 	}
 }

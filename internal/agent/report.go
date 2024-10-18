@@ -49,6 +49,7 @@ type Report struct {
 	Counter      sync.Map // Map для хранения counter-метрик.
 	gaugeCount   int      // Количество gauge-метрик.
 	counterCount int      // Количество counter-метрик.
+	mx           sync.Mutex
 }
 
 // NewReport создаёт и возвращает новый экземпляр Report с инициализированными Map.
@@ -80,4 +81,13 @@ func (r *Report) AddCounter(name string, value int64) {
 		r.Counter.Store(name, &value)
 		r.counterCount++
 	}
+}
+
+func (r *Report) Clean() {
+	r.mx.Lock()
+	defer r.mx.Unlock()
+	r.gaugeCount = 0
+	r.counterCount = 0
+	r.Gauge = sync.Map{}
+	r.Counter = sync.Map{}
 }

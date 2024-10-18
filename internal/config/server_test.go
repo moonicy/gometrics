@@ -38,6 +38,10 @@ func TestNewServerConfig_WithEnvVars(t *testing.T) {
 	if err != nil {
 		t.Errorf("Failed to set environment variable RESTORE: %v", err)
 	}
+	err = os.Setenv("CRYPTO_KEY", "str")
+	if err != nil {
+		t.Errorf("Failed to set environment variable CRYPTO_KEY: %v", err)
+	}
 	defer func() {
 		err = os.Unsetenv("ADDRESS")
 		if err != nil {
@@ -63,6 +67,10 @@ func TestNewServerConfig_WithEnvVars(t *testing.T) {
 		if err != nil {
 			t.Errorf("Failed to delete environment variable RESTORE: %v", err)
 		}
+		err = os.Unsetenv("CRYPTO_KEY")
+		if err != nil {
+			t.Errorf("Failed to delete environment variable CRYPTO_KEY: %v", err)
+		}
 	}()
 
 	sc := NewServerConfig()
@@ -84,6 +92,9 @@ func TestNewServerConfig_WithEnvVars(t *testing.T) {
 	}
 	if sc.HashKey != "envsecret" {
 		t.Errorf("Expected HashKey to be envsecret, got %s", sc.HashKey)
+	}
+	if sc.CryptoKey != "str" {
+		t.Errorf("Expected CryptoKey to be str, got %s", sc.CryptoKey)
 	}
 }
 
@@ -125,6 +136,9 @@ func TestNewServerConfig_FlagsAndEnvVars(t *testing.T) {
 	}
 	if sc.HashKey != "" {
 		t.Errorf("Expected HashKey to be empty, got %s", sc.HashKey)
+	}
+	if sc.CryptoKey != "keys/private.pem" {
+		t.Errorf("Expected CryptoKey to be keys/private.pem, got %s", sc.CryptoKey)
 	}
 }
 
