@@ -74,7 +74,7 @@ func (m *MockProducer) Close() error {
 func TestNewFileStorage(t *testing.T) {
 	cfg := config.ServerConfig{
 		Host:            "localhost:8080",
-		StoreInternal:   300,
+		StoreInterval:   300,
 		FileStoragePath: "/tmp/storage.log",
 		Restore:         true,
 		DatabaseDsn:     "user:pass@/dbname",
@@ -101,7 +101,7 @@ func TestNewFileStorage(t *testing.T) {
 
 func TestFileStorage_SetGauge(t *testing.T) {
 	cfg := config.ServerConfig{
-		StoreInternal: 0,
+		StoreInterval: 0,
 	}
 	mockMem := NewMemStorage()
 	mockConsumer := &MockConsumer{}
@@ -142,7 +142,7 @@ func TestFileStorage_SetGauge(t *testing.T) {
 
 func TestFileStorage_AddCounter(t *testing.T) {
 	cfg := config.ServerConfig{
-		StoreInternal: 0,
+		StoreInterval: 0,
 	}
 	mockMem := NewMemStorage()
 	mockConsumer := &MockConsumer{}
@@ -279,7 +279,7 @@ func TestFileStorage_Init_Restore(t *testing.T) {
 
 	cfg := config.ServerConfig{
 		Restore:         true,
-		StoreInternal:   0,
+		StoreInterval:   0,
 		FileStoragePath: "dummy_path",
 	}
 	mockMem := NewMemStorage()
@@ -315,7 +315,7 @@ func TestFileStorage_Init_Restore(t *testing.T) {
 
 func TestFileStorage_RunSync(t *testing.T) {
 	cfg := config.ServerConfig{
-		StoreInternal: 1,
+		StoreInterval: 1,
 	}
 	mockMem := NewMemStorage()
 	mockMem.gauge["cpu"] = 0.90
@@ -348,7 +348,7 @@ func TestFileStorage_RunSync(t *testing.T) {
 
 func TestFileStorage_uploadToFile_ErrorOnProducerOpen(t *testing.T) {
 	cfg := config.ServerConfig{
-		StoreInternal: 0,
+		StoreInterval: 0,
 	}
 	mockMem := NewMemStorage()
 	mockMem.gauge["cpu"] = 0.85
@@ -374,7 +374,7 @@ func TestFileStorage_WaitShutDown(t *testing.T) {
 	ctxt, cancel := context.WithCancel(context.Background())
 
 	cfg := config.ServerConfig{
-		StoreInternal: 0,
+		StoreInterval: 0,
 	}
 	mockMem := NewMemStorage()
 	mockMem.gauge["memory"] = 1024.0
