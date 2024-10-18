@@ -13,8 +13,6 @@ import (
 // Она использует пул воркеров для управления количеством одновременных задач и ограничивает скорость отправки.
 // При завершении возвращает функцию, которую можно вызвать для корректного закрытия пула воркеров.
 func RunSendReport(cfg config.AgentConfig, client *client.Client, mem *agent.Report, callback func()) func() {
-	var reportInterval = time.Duration(cfg.ReportInterval) * time.Second
-
 	cwp := workerpool.NewWorkerPool(5, cfg.RateLimit)
 	cwp.Run()
 
@@ -25,7 +23,7 @@ func RunSendReport(cfg config.AgentConfig, client *client.Client, mem *agent.Rep
 				client.SendReport(mem)
 				return nil
 			})
-			time.Sleep(reportInterval)
+			time.Sleep(cfg.ReportInterval)
 		}
 	}()
 

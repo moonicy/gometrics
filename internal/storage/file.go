@@ -63,7 +63,7 @@ func (fs *FileStorage) SetGauge(ctx context.Context, key string, value float64) 
 	if err != nil {
 		return err
 	}
-	if fs.cfg.StoreInternal == 0 {
+	if fs.cfg.StoreInterval == 0 {
 		err := fs.uploadToFile(ctx)
 		if err != nil {
 			return err
@@ -78,7 +78,7 @@ func (fs *FileStorage) AddCounter(ctx context.Context, key string, value int64) 
 	if err != nil {
 		return err
 	}
-	if fs.cfg.StoreInternal == 0 {
+	if fs.cfg.StoreInterval == 0 {
 		err := fs.uploadToFile(ctx)
 		if err != nil {
 			return err
@@ -141,11 +141,11 @@ func (fs *FileStorage) uploadToFile(ctx context.Context) error {
 
 // RunSync запускает периодическую синхронизацию метрик с файлом.
 func (fs *FileStorage) RunSync() {
-	if fs.cfg.StoreInternal == 0 {
+	if fs.cfg.StoreInterval == 0 {
 		return
 	}
 	go func() {
-		time.Sleep(time.Duration(fs.cfg.StoreInternal) * time.Second)
+		time.Sleep(fs.cfg.StoreInterval)
 		err := fs.uploadToFile(context.Background())
 		if err != nil {
 			log.Println("Error uploading file:", err)
