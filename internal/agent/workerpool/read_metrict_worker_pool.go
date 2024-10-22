@@ -1,11 +1,10 @@
 package workerpool
 
 import (
-	"time"
-
 	"github.com/moonicy/gometrics/internal/agent"
 	"github.com/moonicy/gometrics/internal/config"
 	"github.com/moonicy/gometrics/pkg/workerpool"
+	"time"
 )
 
 // RunReadMetrics запускает горутину для периодического чтения метрик и их сохранения в Report.
@@ -15,15 +14,32 @@ func RunReadMetrics(cfg config.AgentConfig, reader *agent.MetricsReader, mem *ag
 	rwp := workerpool.NewWorkerPool(1, 1)
 	rwp.Run()
 
+	stop := make(chan struct{})
+
 	go func() {
 		defer callback()
 		for {
-			rwp.AddJob(func() error {
-				reader.Read(mem)
-				return nil
-			})
-			time.Sleep(cfg.PollInterval)
+			select {
+			case <-stop:
+				return
+			default:
+				rwp.AddJob(func() error {
+					reader.Read(mem)
+					return nil
+				})
+				time.Sleep(cfg.PollInterval)
+			}
 		}
 	}()
-	return rwp.Close
+	return func() {
+		close(stop)
+		ch := make(chan struct{})
+		rwp.AddJob(func() error {
+			reader.Read(mem)
+			close(ch)
+			return nil
+		})
+		<-ch
+		rwp.Close()
+	}
 }
