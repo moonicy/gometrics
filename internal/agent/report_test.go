@@ -1,7 +1,6 @@
 package agent
 
 import (
-	"sync/atomic"
 	"testing"
 )
 
@@ -21,7 +20,7 @@ func TestSetGauge(t *testing.T) {
 	report := NewReport()
 	report.SetGauge(Alloc, 100.5)
 
-	val, ok := report.Gauge.Load(Alloc)
+	val, ok := report.gauge[Alloc]
 	if !ok {
 		t.Fatalf("Expected to find gauge %s", Alloc)
 	}
@@ -30,8 +29,8 @@ func TestSetGauge(t *testing.T) {
 		t.Errorf("Expected value 100.5, got %v", val)
 	}
 
-	if report.gaugeCount != 1 {
-		t.Errorf("Expected gaugeCount to be 1, got %d", report.gaugeCount)
+	if len(report.gauge) != 1 {
+		t.Errorf("Expected len(gauge) to be 1, got %d", len(report.gauge))
 	}
 }
 
@@ -40,39 +39,39 @@ func TestAddCounter_NewCounter(t *testing.T) {
 	report := NewReport()
 	report.AddCounter(Mallocs, initialValue)
 
-	val, ok := report.Counter.Load(Mallocs)
+	val, ok := report.counter[Mallocs]
 	if !ok {
 		t.Fatalf("Expected to find counter %s", Mallocs)
 	}
 
-	if v := val.(*int64); *v != initialValue {
-		t.Errorf("Expected value 10, got %d", v)
+	if val != initialValue {
+		t.Errorf("Expected value 10, got %d", val)
 	}
 
-	if report.counterCount != 1 {
-		t.Errorf("Expected counterCount to be 1, got %d", report.counterCount)
+	if len(report.counter) != 1 {
+		t.Errorf("Expected len(counter) to be 1, got %d", len(report.counter))
 	}
 }
 
 func TestAddCounter_ExistingCounter(t *testing.T) {
 	report := NewReport()
 	var initialValue int64 = 10
-	report.Counter.Store(Mallocs, &initialValue)
+	report.counter[Mallocs] = initialValue
 
 	report.AddCounter(Mallocs, 5)
 
-	val, ok := report.Counter.Load(Mallocs)
+	val, ok := report.counter[Mallocs]
 	if !ok {
 		t.Fatalf("Expected to find counter %s", Mallocs)
 	}
 
-	if v := atomic.LoadInt64(val.(*int64)); v != 15 {
-		t.Errorf("Expected value 15, got %d", v)
+	if val != 15 {
+		t.Errorf("Expected value 15, got %d", val)
 	}
 
-	// counterCount shouldn't increase if we're adding to an existing counter
-	if report.counterCount != 0 {
-		t.Errorf("Expected counterCount to be 0 for existing counter, got %d", report.counterCount)
+	// len(counter) shouldn't increase if we're adding to an existing counter
+	if len(report.counter) != 1 {
+		t.Errorf("Expected len(counter) to be 1 for existing counter, got %d", len(report.counter))
 	}
 }
 

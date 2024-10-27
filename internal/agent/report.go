@@ -2,7 +2,6 @@ package agent
 
 import (
 	"sync"
-	"sync/atomic"
 )
 
 // Константы, представляющие названия метрик, используемые агентом.
@@ -45,49 +44,61 @@ const (
 
 // Report хранит собранные метрики типа gauge и counter.
 type Report struct {
-	Gauge        sync.Map // Map для хранения gauge-метрик.
-	Counter      sync.Map // Map для хранения counter-метрик.
-	gaugeCount   int      // Количество gauge-метрик.
-	counterCount int      // Количество counter-метрик.
-	mx           sync.Mutex
+	gauge   map[string]float64 // Map для хранения gauge-метрик.
+	counter map[string]int64   // Map для хранения counter-метрик.
+	mx      sync.Mutex
 }
 
 // NewReport создаёт и возвращает новый экземпляр Report с инициализированными Map.
 func NewReport() *Report {
 	return &Report{
-		Gauge:   sync.Map{},
-		Counter: sync.Map{},
+		gauge:   make(map[string]float64),
+		counter: make(map[string]int64),
 	}
 }
 
 // GetCommonCount возвращает общее количество собранных метрик.
 func (r *Report) GetCommonCount() int {
-	return r.gaugeCount + r.counterCount
+	return len(r.gauge) + len(r.counter)
 }
 
 // SetGauge сохраняет gauge-метрику с указанным именем и значением.
 func (r *Report) SetGauge(name string, value float64) {
-	r.Gauge.Store(name, value)
-	r.gaugeCount++
+	r.mx.Lock()
+	defer r.mx.Unlock()
+	r.gauge[name] = value
 }
 
 // AddCounter увеличивает counter-метрику с указанным именем на заданное значение.
 // Если метрика не существует, она инициализируется.
 func (r *Report) AddCounter(name string, value int64) {
-	if v, ok := r.Counter.Load(name); ok {
-		ptr := v.(*int64)
-		atomic.AddInt64(ptr, value)
-	} else {
-		r.Counter.Store(name, &value)
-		r.counterCount++
-	}
+	r.mx.Lock()
+	defer r.mx.Unlock()
+	r.counter[name] += value
 }
 
 func (r *Report) Clean() {
 	r.mx.Lock()
 	defer r.mx.Unlock()
-	r.gaugeCount = 0
-	r.counterCount = 0
-	r.Gauge = sync.Map{}
-	r.Counter = sync.Map{}
+	r.gauge = make(map[string]float64)
+	r.counter = make(map[string]int64)
+}
+
+func (r *Report) GetGauge() map[string]float64 {
+	r.mx.Lock()
+	defer r.mx.Unlock()
+	gauges := make(map[string]float64)
+	for k, v := range r.gauge {
+		gauges[k] = v
+	}
+	return gauges
+}
+func (r *Report) GetCounter() map[string]int64 {
+	r.mx.Lock()
+	defer r.mx.Unlock()
+	counters := make(map[string]int64)
+	for k, v := range r.counter {
+		counters[k] = v
+	}
+	return counters
 }

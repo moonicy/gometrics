@@ -113,30 +113,28 @@ func (cl *Client) SendReport(report *agent.Report) {
 
 func (cl *Client) makeRequestData(report *agent.Report) ([]byte, error) {
 	metrics := make([]m.Metric, 0, report.GetCommonCount())
-	report.Counter.Range(func(key, value any) bool {
-		v := value.(*int64)
+	counter := report.GetCounter()
+	for k, v := range counter {
 		metrics = append(metrics, m.Metric{
 			MetricName: m.MetricName{
-				ID:    key.(string),
+				ID:    k,
 				MType: m.Counter,
 			},
-			Delta: v,
+			Delta: &v,
 			Value: nil,
 		})
-		return true
-	})
-	report.Gauge.Range(func(key, value any) bool {
-		v := value.(float64)
+	}
+	gauges := report.GetGauge()
+	for k, v := range gauges {
 		metrics = append(metrics, m.Metric{
 			MetricName: m.MetricName{
-				ID:    key.(string),
+				ID:    k,
 				MType: m.Gauge,
 			},
 			Delta: nil,
 			Value: &v,
 		})
-		return true
-	})
+	}
 
 	report.Clean()
 
