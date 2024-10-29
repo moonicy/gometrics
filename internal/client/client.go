@@ -1,8 +1,11 @@
 package client
 
 import (
+	"bytes"
 	"errors"
 	"fmt"
+	"github.com/moonicy/gometrics/pkg/crypt"
+	"io"
 	"log"
 	"net/http"
 	"net/url"
@@ -21,14 +24,16 @@ type Client struct {
 	httpClient *http.Client
 	host       string
 	hashKey    string
+	cryptoKey  string
 }
 
 // NewClient создаёт и возвращает новый экземпляр Client с заданным хостом и ключом хеширования.
-func NewClient(host string, key string) *Client {
+func NewClient(host string, key string, cryptoKey string) *Client {
 	return &Client{
 		httpClient: &http.Client{},
 		host:       host,
 		hashKey:    key,
+		cryptoKey:  cryptoKey,
 	}
 }
 
@@ -48,8 +53,22 @@ func (cl *Client) SendReport(report *agent.Report) {
 		return
 	}
 
+	compressedData, err := io.ReadAll(buf)
+	if err != nil {
+		log.Print(err)
+		return
+	}
+
+	if cl.cryptoKey != "" {
+		compressedData, err = crypt.Encrypt(cl.cryptoKey, compressedData)
+		if err != nil {
+			log.Print(err)
+			return
+		}
+	}
+
 	uri := fmt.Sprintf("%s/updates/", cl.host)
-	req, err := http.NewRequest("POST", uri, buf)
+	req, err := http.NewRequest("POST", uri, bytes.NewReader(compressedData))
 	if err != nil {
 		log.Print(err)
 		return
@@ -118,6 +137,9 @@ func (cl *Client) makeRequestData(report *agent.Report) ([]byte, error) {
 		})
 		return true
 	})
+
+	report.Clean()
+
 	out, err := jsoniter.Marshal(metrics)
 	if err != nil {
 		log.Print(err)
