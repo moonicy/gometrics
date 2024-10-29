@@ -1,12 +1,11 @@
 package workerpool
 
 import (
-	"time"
-
 	"github.com/moonicy/gometrics/internal/agent"
 	"github.com/moonicy/gometrics/internal/client"
 	"github.com/moonicy/gometrics/internal/config"
 	"github.com/moonicy/gometrics/pkg/workerpool"
+	"time"
 )
 
 // RunSendReport запускает горутину для периодической отправки отчета с метриками на сервер.
@@ -16,16 +15,34 @@ func RunSendReport(cfg config.AgentConfig, client *client.Client, mem *agent.Rep
 	cwp := workerpool.NewWorkerPool(5, cfg.RateLimit)
 	cwp.Run()
 
+	stop := make(chan struct{})
+
 	go func() {
+
 		defer callback()
 		for {
-			cwp.AddJob(func() error {
-				client.SendReport(mem)
-				return nil
-			})
-			time.Sleep(cfg.ReportInterval)
+			select {
+			case <-stop:
+				return
+			default:
+				cwp.AddJob(func() error {
+					client.SendReport(mem)
+					return nil
+				})
+				time.Sleep(cfg.ReportInterval)
+			}
 		}
 	}()
 
-	return cwp.Close
+	return func() {
+		close(stop)
+		ch := make(chan struct{})
+		cwp.AddJob(func() error {
+			client.SendReport(mem)
+			ch <- struct{}{}
+			return nil
+		})
+		<-ch
+		cwp.Close()
+	}
 }

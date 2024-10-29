@@ -5,7 +5,10 @@ import (
 	"log"
 	"net/http"
 	_ "net/http/pprof"
+	"os"
+	"os/signal"
 	"sync"
+	"syscall"
 
 	"github.com/moonicy/gometrics/internal/agent"
 	"github.com/moonicy/gometrics/internal/agent/workerpool"
@@ -54,7 +57,11 @@ func main() {
 	closeReadFn := workerpool.RunReadMetrics(cfg, reader, mem, wg.Done)
 	closeSendFn := workerpool.RunSendReport(cfg, client, mem, wg.Done)
 
+	exit := make(chan os.Signal, 1)
+	signal.Notify(exit, os.Interrupt, syscall.SIGTERM, syscall.SIGINT, syscall.SIGQUIT)
+	<-exit
+
 	wg.Wait()
-	closeSendFn()
 	closeReadFn()
+	closeSendFn()
 }
