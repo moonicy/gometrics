@@ -28,6 +28,8 @@ type ServerConfig struct {
 	CryptoKey string `json:"crypto_key"`
 	// Config - путь до файла конфигурации.
 	Config string
+	// TrustedSubnet строковое представление бесклассовой адресации (CIDR)
+	TrustedSubnet string
 }
 
 // NewServerConfig создаёт и возвращает новый экземпляр ServerConfig, инициализированный с помощью флагов.
@@ -49,6 +51,7 @@ func (sc *ServerConfig) parseFlag() {
 	flag.StringVar(&scFlags.CryptoKey, "crypto-key", DefaultCryptoKeyServer, "crypto key")
 	flag.StringVar(&scFlags.Config, "c", "", "file config")
 	flag.StringVar(&sc.Config, "config", "", "file config")
+	flag.StringVar(&scFlags.TrustedSubnet, "t", "", "trusted subnet")
 	flag.Parse()
 
 	if scFlags.Config != "" {
@@ -127,5 +130,8 @@ func (sc *ServerConfig) parseFlag() {
 	}
 	if envCryptoKey := os.Getenv("CRYPTO_KEY"); envCryptoKey != "" {
 		sc.CryptoKey = envCryptoKey
+	}
+	if evnTrustedSubnet := os.Getenv("TRUSTED_SUBNET"); evnTrustedSubnet != "" {
+		sc.TrustedSubnet = evnTrustedSubnet
 	}
 }
