@@ -5,7 +5,9 @@ import (
 	"errors"
 	"fmt"
 	"go.uber.org/zap"
+	"google.golang.org/grpc"
 	"log"
+	"net"
 	"net/http"
 	"net/http/pprof"
 	"os"
@@ -20,8 +22,10 @@ import (
 	"github.com/moonicy/gometrics/internal/config"
 	"github.com/moonicy/gometrics/internal/file"
 	"github.com/moonicy/gometrics/internal/handlers"
+	grpcserver "github.com/moonicy/gometrics/internal/server"
 	database2 "github.com/moonicy/gometrics/pkg/database"
 	"github.com/moonicy/gometrics/pkg/logger"
+	pb "github.com/moonicy/gometrics/proto"
 )
 
 var (
@@ -79,8 +83,7 @@ func main() {
 
 	route := handlers.NewRoute(metricsHandler, sugar, cfg)
 
-	var wg sync.WaitGroup
-	wg.Add(1)
+	gserver := grpcserver.NewGRPCServer(storage)
 
 	sugar.Infow(
 		"Starting server",
@@ -94,12 +97,35 @@ func main() {
 		Handler: route,
 	}
 
+	var wg sync.WaitGroup
+	wg.Add(2)
+
 	go func() {
 		defer wg.Done()
 		err = server.ListenAndServe()
 		if err != nil && !errors.Is(err, http.ErrServerClosed) {
 			sugar.Fatalw(err.Error(), "event", "start server")
 		}
+	}()
+
+	go func() {
+		defer wg.Done()
+		// определяем порт для сервера
+		listen, err := net.Listen("tcp", ":3200")
+		if err != nil {
+			log.Fatal(err)
+		}
+		// создаём gRPC-сервер без зарегистрированной службы
+		s := grpc.NewServer()
+		// регистрируем сервис
+		pb.RegisterMetricsServer(s, gserver)
+
+		fmt.Println("Сервер gRPC начал работу")
+		// получаем запрос gRPC
+		if err = s.Serve(listen); err != nil {
+			log.Fatal(err)
+		}
+		fmt.Println("Сервер gRPC завершил работу")
 	}()
 
 	exit := make(chan os.Signal, 1)

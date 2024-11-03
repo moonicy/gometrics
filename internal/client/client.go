@@ -2,6 +2,7 @@ package client
 
 import (
 	"bytes"
+	"context"
 	"errors"
 	"fmt"
 	"github.com/moonicy/gometrics/pkg/crypt"
@@ -41,7 +42,7 @@ func NewClient(host string, key string, cryptoKey string) *Client {
 // SendReport отправляет отчет с метриками на сервер.
 // Он собирает данные метрик, сжимает их, добавляет необходимые заголовки и отправляет HTTP-запрос.
 // В случае ошибок выполняет повторные попытки с помощью механизма retry.
-func (cl *Client) SendReport(report *agent.Report) {
+func (cl *Client) SendReport(_ context.Context, report *agent.Report) {
 	out, err := cl.makeRequestData(report)
 	if err != nil {
 		log.Print(err)

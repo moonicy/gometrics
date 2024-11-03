@@ -26,6 +26,7 @@ type AgentConfig struct {
 	CryptoKey string `json:"crypto_key"`
 	// Config - путь до файла конфигурации.
 	Config string
+	Grpc   bool
 }
 
 // NewAgentConfig создаёт и возвращает новый экземпляр AgentConfig, инициализированный с помощью флагов.
@@ -47,6 +48,7 @@ func (ac *AgentConfig) parseFlag() {
 	flag.StringVar(&scFlags.CryptoKey, "crypto-key", DefaultCryptoKeyAgent, "crypto key")
 	flag.StringVar(&scFlags.Config, "c", "", "file config")
 	flag.StringVar(&ac.Config, "config", "", "file config")
+	flag.BoolVar(&ac.Grpc, "g", false, "grpc server")
 	flag.Parse()
 
 	if scFlags.Config != "" {
@@ -122,5 +124,10 @@ func (ac *AgentConfig) parseFlag() {
 	}
 	if envConfig := os.Getenv("CONFIG"); envConfig != "" {
 		ac.Config = envConfig
+	}
+	if envGrpcServer := os.Getenv("GRPC_SERVER"); envGrpcServer == "true" || envGrpcServer == "1" {
+		ac.Grpc = true
+	} else if envGrpcServer == "false" || envGrpcServer == "0" {
+		ac.Grpc = false
 	}
 }

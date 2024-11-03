@@ -1,6 +1,7 @@
 package client
 
 import (
+	"context"
 	"io"
 	"log"
 	"net/http"
@@ -40,7 +41,7 @@ func TestClient_SendReport(t *testing.T) {
 		httpClient: http.DefaultClient,
 		host:       server.URL,
 	}
-	cl.SendReport(report)
+	cl.SendReport(context.TODO(), report)
 }
 
 func BenchmarkClient_makeResponseData(b *testing.B) {
