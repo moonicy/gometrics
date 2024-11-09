@@ -183,3 +183,9 @@ func TestMemStorage_SetMetrics(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, 2.71, valGauge)
 }
+
+func TestMemStorage_Init(t *testing.T) {
+	ms := NewMemStorage()
+	err := ms.Init(ctx)
+	assert.NoError(t, err)
+}

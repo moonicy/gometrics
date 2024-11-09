@@ -19,13 +19,15 @@ func CryptMiddleware(publicKeyPath, privateKeyPath string) func(http.Handler) ht
 					return
 				}
 
-				decryptedBody, err := crypt.Decrypt(privateKeyPath, bodyBytes)
-				if err != nil {
-					http.Error(w, "Failed to decrypt request", http.StatusInternalServerError)
-					return
-				}
+				if len(bodyBytes) != 0 {
+					decryptedBody, err := crypt.Decrypt(privateKeyPath, bodyBytes)
+					if err != nil {
+						http.Error(w, "Failed to decrypt request", http.StatusInternalServerError)
+						return
+					}
 
-				r.Body = io.NopCloser(bytes.NewReader(decryptedBody))
+					r.Body = io.NopCloser(bytes.NewReader(decryptedBody))
+				}
 			}
 
 			responseRecorder := &ResponseRecorder{ResponseWriter: w, body: &bytes.Buffer{}}

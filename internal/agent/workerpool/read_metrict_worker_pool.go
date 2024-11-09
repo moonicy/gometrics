@@ -7,10 +7,14 @@ import (
 	"time"
 )
 
+type MetricsReader interface {
+	Read(mem *agent.Report)
+}
+
 // RunReadMetrics запускает горутину для периодического чтения метрик и их сохранения в Report.
 // Она использует пул воркеров для выполнения задач чтения метрик с заданным интервалом.
 // При завершении возвращает функцию для корректного закрытия пула воркеров.
-func RunReadMetrics(cfg config.AgentConfig, reader *agent.MetricsReader, mem *agent.Report, callback func()) func() {
+func RunReadMetrics(cfg config.AgentConfig, reader MetricsReader, mem *agent.Report, callback func()) func() {
 	rwp := workerpool.NewWorkerPool(1, 1)
 	rwp.Run()
 
