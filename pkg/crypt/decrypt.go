@@ -28,7 +28,7 @@ func Decrypt(privateKeyPath string, encryptedData []byte) ([]byte, error) {
 
 	privateKey, err := x509.ParsePKCS1PrivateKey(block.Bytes)
 	if err != nil {
-		return nil, err
+		return nil, errors.New("failed to parse private key")
 	}
 
 	var decryptedBuffer bytes.Buffer

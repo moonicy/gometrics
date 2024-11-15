@@ -28,12 +28,12 @@ func Encrypt(publicKeyPath string, data []byte) ([]byte, error) {
 		return nil, errors.New("failed to decode PEM block containing public key")
 	}
 
-	publicKey, err := x509.ParsePKIXPublicKey(block.Bytes)
+	publicKeyInterface, err := x509.ParsePKIXPublicKey(block.Bytes)
 	if err != nil {
 		return nil, err
 	}
 
-	rsaPublicKey, ok := publicKey.(*rsa.PublicKey)
+	rsaPublicKey, ok := publicKeyInterface.(*rsa.PublicKey)
 	if !ok {
 		return nil, errors.New("not RSA public key")
 	}

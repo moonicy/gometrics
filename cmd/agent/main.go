@@ -42,7 +42,15 @@ func main() {
 	cfg.Host = config.ParseURI(cfg.Host)
 
 	mem := agent.NewReport()
-	client := metricsClient.NewClient(cfg.Host, cfg.HashKey, cfg.CryptoKey)
+	var client workerpool.Client
+	client = metricsClient.NewClient(cfg.Host, cfg.HashKey, cfg.CryptoKey)
+	if cfg.Grpc {
+		grpcClient, err := metricsClient.NewGRPCClient()
+		if err != nil {
+			log.Fatal(err)
+		}
+		client = grpcClient
+	}
 	reader := agent.NewMetricsReader()
 	var wg sync.WaitGroup
 	wg.Add(2)

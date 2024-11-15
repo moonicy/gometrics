@@ -86,3 +86,55 @@ func TestGetCommonCount(t *testing.T) {
 		t.Errorf("Expected common count to be %d, got %d", expected, report.GetCommonCount())
 	}
 }
+
+func TestReportClean(t *testing.T) {
+	report := &Report{
+		gauge:   map[string]float64{"metric1": 1.23, "metric2": 4.56},
+		counter: map[string]int64{"count1": 10, "count2": 20},
+	}
+
+	report.Clean()
+
+	if len(report.GetGauge()) != 0 {
+		t.Error("expected gauge map to be empty after Clean()")
+	}
+	if len(report.GetCounter()) != 0 {
+		t.Error("expected counter map to be empty after Clean()")
+	}
+}
+
+func TestReportGetGauge(t *testing.T) {
+	report := &Report{
+		gauge: map[string]float64{"metric1": 1.23, "metric2": 4.56},
+	}
+
+	gauge := report.GetGauge()
+
+	if len(gauge) != 2 {
+		t.Errorf("expected gauge map length 2, got %d", len(gauge))
+	}
+	if gauge["metric1"] != 1.23 {
+		t.Errorf("expected gauge[\"metric1\"] to be 1.23, got %f", gauge["metric1"])
+	}
+	if gauge["metric2"] != 4.56 {
+		t.Errorf("expected gauge[\"metric2\"] to be 4.56, got %f", gauge["metric2"])
+	}
+}
+
+func TestReportGetCounter(t *testing.T) {
+	report := &Report{
+		counter: map[string]int64{"count1": 10, "count2": 20},
+	}
+
+	counter := report.GetCounter()
+
+	if len(counter) != 2 {
+		t.Errorf("expected counter map length 2, got %d", len(counter))
+	}
+	if counter["count1"] != 10 {
+		t.Errorf("expected counter[\"count1\"] to be 10, got %d", counter["count1"])
+	}
+	if counter["count2"] != 20 {
+		t.Errorf("expected counter[\"count2\"] to be 20, got %d", counter["count2"])
+	}
+}

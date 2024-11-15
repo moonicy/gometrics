@@ -11,7 +11,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/moonicy/gometrics/pkg/hash"
+	mhash "github.com/moonicy/gometrics/pkg/hash"
 )
 
 func TestSignCheckMiddleware(t *testing.T) {
@@ -44,7 +44,7 @@ func TestSignCheckMiddleware(t *testing.T) {
 			name:               "Valid hash header",
 			key:                "secret",
 			requestBody:        []byte("Test request body"),
-			requestHashHeader:  hash.CalcHash([]byte("Test request body"), "secret"),
+			requestHashHeader:  mhash.CalcHash([]byte("Test request body"), "secret"),
 			contentType:        "application/json",
 			expectedStatusCode: http.StatusOK,
 			expectHashHeader:   true,
@@ -108,5 +108,22 @@ func TestSignCheckMiddleware(t *testing.T) {
 				assert.Empty(t, responseHashHeader)
 			}
 		})
+	}
+}
+
+func TestSignResponseWriter_WriteHeader(t *testing.T) {
+	recorder := httptest.NewRecorder()
+
+	var hasher = sha256.New()
+
+	srw := &signResponseWriter{
+		ResponseWriter: recorder,
+		hash:           hasher,
+	}
+
+	srw.WriteHeader(http.StatusAccepted)
+
+	if recorder.Code != http.StatusAccepted {
+		t.Errorf("Expected status code %d, got %d", http.StatusAccepted, recorder.Code)
 	}
 }
