@@ -29,6 +29,7 @@ func NewRoute(mh *MetricsHandler, log *zap.SugaredLogger, cfg config.ServerConfi
 			r.Post("/{type}/{name}/{value}", mh.PostMetricUpdate)
 		})
 		r.Route("/updates", func(r chi.Router) {
+			r.Use(middlewares.IPCheckMiddleware(cfg.TrustedSubnet))
 			r.Post("/", mh.PostMetricsUpdatesJSON)
 		})
 		r.Get("/ping", mh.GetPing)
